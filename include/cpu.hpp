@@ -27,6 +27,7 @@ namespace GBEMU {
         void setFlag(Flag flag, bool value);
         void setFlags(uint8_t flags);
         void resetFlags(uint8_t flags);
+        void adx8bSetFlags(uint8_t r, uint16_t real);
         void inc8b(uint8_t& r);
         void dec8b(uint8_t& r);
         void rl8b(uint8_t& r);
@@ -34,6 +35,7 @@ namespace GBEMU {
         void rlc8b(uint8_t& r);
         void rrc8b(uint8_t& r);
         void add8b(uint8_t& r1, uint8_t r2);
+        void adc8b(uint8_t& r1, uint8_t r2);
         void inc16b2(uint8_t& r1, uint8_t& r2);
         void dec16b2(uint8_t& r1, uint8_t& r2);
         void mov16bmem(uint16_t addr, uint16_t value);

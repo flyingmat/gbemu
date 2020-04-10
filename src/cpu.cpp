@@ -47,6 +47,13 @@ namespace GBEMU {
         this->F &= (flags ^ 0xFF);
     }
 
+    void Cpu::adx8bSetFlags(uint8_t r, uint16_t real) {
+        this->setFlag(Flag::zf, r == 0x00);
+        this->setFlag(Flag::n, 0);
+        this->setFlag(Flag::h, r == 0x10);
+        this->setFlag(Flag::cy, real > 0xFF);
+    }
+
     void Cpu::inc8b(uint8_t& r) {
         r++;
         this->setFlag(Flag::zf, r == 0x00);
@@ -90,10 +97,13 @@ namespace GBEMU {
     void Cpu::add8b(uint8_t& r1, uint8_t r2) {
         uint16_t real = r1 + r2;
         r1 = real & 0x00FF;
-        this->setFlag(Flag::zf, r1 == 0x00);
-        this->setFlag(Flag::n, 0);
-        this->setFlag(Flag::h, r1 == 0x10);
-        this->setFlag(Flag::cy, real > 0xFF);
+        this->adx8bSetFlags(r1, real);
+    }
+
+    void Cpu::adc8b(uint8_t& r1, uint8_t r2) {
+        uint16_t real = r1 + r2 + this->getFlag(Flag::cy);
+        r1 = real & 0x00FF;
+        this->adx8bSetFlags(r1, real);
     }
 
     void Cpu::inc16b2(uint8_t& r1, uint8_t& r2) {
@@ -436,10 +446,42 @@ namespace GBEMU {
             // ADD A,(HL)
             case 0x86:
                 this->add8b(this->A, (*this->memory)[this->getHL()]);
-                return 4;
+                return 8;
             // ADD A,A
             case 0x87:
                 this->add8b(this->A, this->A);
+                return 4;
+            // ADC A,B
+            case 0x88:
+                this->adc8b(this->A, this->B);
+                return 4;
+            // ADC A,C
+            case 0x89:
+                this->adc8b(this->A, this->C);
+                return 4;
+            // ADC A,D
+            case 0x8A:
+                this->adc8b(this->A, this->D);
+                return 4;
+            // ADC A,E
+            case 0x8B:
+                this->adc8b(this->A, this->E);
+                return 4;
+            // ADC A,H
+            case 0x8C:
+                this->adc8b(this->A, this->H);
+                return 4;
+            // ADC A,L
+            case 0x8D:
+                this->adc8b(this->A, this->L);
+                return 4;
+            // ADC A,(HL)
+            case 0x8E:
+                this->adc8b(this->A, (*this->memory)[this->getHL()]);
+                return 8;
+            // ADC A,A
+            case 0x8F:
+                this->adc8b(this->A, this->A);
                 return 4;
             }
         }
