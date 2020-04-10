@@ -413,6 +413,34 @@ namespace GBEMU {
             case 0x80:
                 this->add8b(this->A, this->B);
                 return 4;
+            // ADD A,C
+            case 0x81:
+                this->add8b(this->A, this->C);
+                return 4;
+            // ADD A,D
+            case 0x82:
+                this->add8b(this->A, this->D);
+                return 4;
+            // ADD A,E
+            case 0x83:
+                this->add8b(this->A, this->E);
+                return 4;
+            // ADD A,H
+            case 0x84:
+                this->add8b(this->A, this->H);
+                return 4;
+            // ADD A,L
+            case 0x85:
+                this->add8b(this->A, this->L);
+                return 4;
+            // ADD A,(HL)
+            case 0x86:
+                this->add8b(this->A, (*this->memory)[this->getHL()]);
+                return 4;
+            // ADD A,A
+            case 0x87:
+                this->add8b(this->A, this->A);
+                return 4;
             }
         }
 
