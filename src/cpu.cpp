@@ -29,6 +29,10 @@ namespace GBEMU {
         return this->joinBytes(this->B, this->C);
     }
 
+    ushort Cpu::getDE() {
+        return this->joinBytes(this->D, this->E);
+    }
+
     void Cpu::setFlag(Flag flag, bool value) {
         if (value)
             this->F |= (uchar) flag;
@@ -70,6 +74,13 @@ namespace GBEMU {
 
     void Cpu::rlc8bRegister(uchar& r) {
         this->setFlag(Flag::cy, r >> 7);
+        r = (r << 1) | (r >> 7);
+        this->resetFlags((uchar) Flag::zf | (uchar) Flag::n | (uchar) Flag::h);
+    }
+
+    void Cpu::rrc8bRegister(uchar& r) {
+        this->setFlag(Flag::cy, r & 0x01);
+        r = (r >> 1) | ((r & 0x01) << 7);
         this->resetFlags((uchar) Flag::zf | (uchar) Flag::n | (uchar) Flag::h);
     }
 
@@ -77,6 +88,12 @@ namespace GBEMU {
         r2++;
         if (!r2)
             r1++;
+    }
+
+    void Cpu::dec16bRegister(uchar& r1, uchar& r2) {
+        r2--;
+        if (r2 == 0xFF)
+            r1--;
     }
 
     void Cpu::mov16bRegister(ushort addr, ushort value) {
@@ -134,6 +151,77 @@ namespace GBEMU {
             case 0x09:
                 this->add16bRegisters(this->H, this->L, this->B, this->C);
                 return 8;
+            // LD A,(BC)
+            case 0x0A:
+                this->A = (*this->memory)[this->getBC()];
+                return 8;
+            // DEC BC
+            case 0x0B:
+                this->dec16bRegister(this->B, this->C);
+                return 8;
+            // INC C
+            case 0x0C:
+                this->inc8bRegister(this->C);
+                return 4;
+            // DEC C
+            case 0x0D:
+                this->dec8bRegister(this->C);
+                return 4;
+            // LD C,u8
+            case 0x0E:
+                this->C = args[0];
+                return 8;
+            // RRCA
+            case 0x0F:
+                this->rrc8bRegister(this->A);
+                return 4;
+            // STOP
+            case 0x10:
+                // to be implemented
+                return 4;
+            // LD DE,u16
+            case 0x11:
+                this->D = args[0];
+                this->E = args[1];
+                return 12;
+            // LD (DE),A
+            case 0x12:
+                (*this->memory)[this->getDE()] = this->A;
+                return 8;
+            // INC DE
+            case 0x13:
+                this->inc16bRegister(this->D, this->E);
+                return 8;
+            // INC D
+            case 0x14:
+                this->inc8bRegister(this->D);
+                return 4;
+            // DEC D
+            case 0x15:
+                this->dec8bRegister(this->D);
+                return 4;
+            // LD D,u8
+            case 0x16:
+                this->D = args[0];
+                return 8;
+            // // RLA
+            // case 0x17:
+            // // JR i8
+            // case 0x18:
+            // // ADD HL,DE
+            // case 0x19:
+            // // LD A,(DE)
+            // case 0x1A:
+            // // DEC DE
+            // case 0x1B:
+            // // INC E
+            // case 0x1C:
+            // // DEC E
+            // case 0x1D:
+            // // LD E,u8
+            // case 0x1E:
+            // // RRA
+            // case 0x1F:
             }
         }
 
