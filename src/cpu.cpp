@@ -88,11 +88,12 @@ namespace GBEMU {
     }
 
     void Cpu::add8b(uint8_t& r1, uint8_t r2) {
-        this->setFlag(Flag::cy, r1 + r2 > 0xFF);
-        r1 += r2;
+        uint16_t real = r1 + r2;
+        r1 = real & 0x00FF;
         this->setFlag(Flag::zf, r1 == 0x00);
         this->setFlag(Flag::n, 0);
         this->setFlag(Flag::h, r1 == 0x10);
+        this->setFlag(Flag::cy, real > 0xFF);
     }
 
     void Cpu::inc16b2(uint8_t& r1, uint8_t& r2) {
