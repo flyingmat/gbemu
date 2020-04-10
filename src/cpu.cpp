@@ -87,6 +87,14 @@ namespace GBEMU {
         this->resetFlags((uint8_t) Flag::zf | (uint8_t) Flag::n | (uint8_t) Flag::h);
     }
 
+    void Cpu::add8b(uint8_t& r1, uint8_t r2) {
+        this->setFlag(Flag::cy, r1 + r2 > 0xFF);
+        r1 += r2;
+        this->setFlag(Flag::zf, r1 == 0x00);
+        this->setFlag(Flag::n, 0);
+        this->setFlag(Flag::h, r1 == 0x10);
+    }
+
     void Cpu::inc16b2(uint8_t& r1, uint8_t& r2) {
         r2++;
         if (!r2)
@@ -105,12 +113,13 @@ namespace GBEMU {
     }
 
     void Cpu::add16b2x2(uint8_t& r1, uint8_t& r2, uint8_t r3, uint8_t r4) {
-        uint16_t result = this->joinBytes(r1, r2) + this->joinBytes(r3, r4);
+        uint32_t real = this->joinBytes(r1, r2) + this->joinBytes(r3, r4);
+        uint16_t result = real & 0xFFFF;
         r1 = result >> 8;
         r2 = result & 0x00FF;
         this->setFlag(Flag::n, 0);
         this->setFlag(Flag::h, result == 0x0100);
-        this->setFlag(Flag::cy, result == 0x0000);
+        this->setFlag(Flag::cy, result == (real > 0xFFFF));
     }
 
     uint8_t Cpu::jrConditional(Flag flag, bool value, int8_t jvalue) {
@@ -398,6 +407,10 @@ namespace GBEMU {
             case 0x3F:
                 this->setFlag(Flag::cy, !this->getFlag(Flag::cy));
                 this->resetFlags((uint8_t) Flag::n | (uint8_t) Flag::h);
+                return 4;
+            // ADD A,B
+            case 0x80:
+                this->add8b(this->A, this->B);
                 return 4;
             }
         }

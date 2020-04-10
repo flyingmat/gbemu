@@ -33,6 +33,7 @@ namespace GBEMU {
         void rr8b(uint8_t& r);
         void rlc8b(uint8_t& r);
         void rrc8b(uint8_t& r);
+        void add8b(uint8_t& r1, uint8_t r2);
         void inc16b2(uint8_t& r1, uint8_t& r2);
         void dec16b2(uint8_t& r1, uint8_t& r2);
         void mov16bmem(uint16_t addr, uint16_t value);
