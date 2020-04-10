@@ -33,6 +33,10 @@ namespace GBEMU {
         return this->joinBytes(this->D, this->E);
     }
 
+    ushort Cpu::getHL() {
+        return this->joinBytes(this->H, this->L);
+    }
+
     bool Cpu::getFlag(Flag flag) {
         return (this->F & (uchar) flag) != 0;
     }
@@ -258,6 +262,43 @@ namespace GBEMU {
             case 0x1F:
                 this->rr8bRegister(this->A);
                 return 4;
+            // JR NZ,i8
+            case 0x20:
+                if (!this->getFlag(Flag::zf)) {
+                    this->PC += (char) args[0];
+                    return 12;
+                }
+                return 8;
+            // LD HL,u16
+            case 0x21:
+                this->H = args[0];
+                this->L = args[1];
+                return 12;
+            // LD (HL+),A
+            case 0x22:
+                (*this->memory)[this->getHL()] = this->A;
+                this->inc16bRegister(this->H, this->L);
+                return 8;
+            // INC HL
+            case 0x23:
+                this->inc16bRegister(this->H, this->L);
+                return 8;
+            // INC H
+            case 0x24:
+                this->inc8bRegister(this->H);
+                return 4;
+            // DEC H
+            case 0x25:
+                this->dec8bRegister(this->H);
+                return 4;
+            // LD H,u8
+            case 0x26:
+                this->H = args[0];
+                return 8;
+            // // DAA
+            // case 0x27:
+            // // JR Z,i8
+            // case 0x28:
             }
         }
 
