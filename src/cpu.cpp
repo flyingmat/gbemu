@@ -2,7 +2,7 @@
 
 namespace GBEMU {
 
-    Cpu::Cpu(uchar*& memory) {
+    Cpu::Cpu(uint8_t*& memory) {
         this->A = 0;
         this->F = 0;
         this->B = 0;
@@ -20,117 +20,96 @@ namespace GBEMU {
         this->memory = nullptr;
     }
 
-    ushort Cpu::joinBytes(uchar r1, uchar r2) {
-        ushort out = r2;
-        return out | ((ushort) r1 << 8);
+    uint16_t Cpu::joinBytes(uint8_t r1, uint8_t r2) {
+        return (r1 << 8) | r2;
     }
 
-    ushort Cpu::getBC() {
-        return this->joinBytes(this->B, this->C);
-    }
-
-    ushort Cpu::getDE() {
-        return this->joinBytes(this->D, this->E);
-    }
-
-    ushort Cpu::getHL() {
-        return this->joinBytes(this->H, this->L);
-    }
+    uint16_t Cpu::getBC() { return this->joinBytes(this->B, this->C); }
+    uint16_t Cpu::getDE() { return this->joinBytes(this->D, this->E); }
+    uint16_t Cpu::getHL() { return this->joinBytes(this->H, this->L); }
 
     bool Cpu::getFlag(Flag flag) {
-        return (this->F & (uchar) flag) != 0;
+        return (this->F & (uint8_t) flag) != 0;
     }
 
     void Cpu::setFlag(Flag flag, bool value) {
         if (value)
-            this->F |= (uchar) flag;
+            this->F |= (uint8_t) flag;
         else
-            this->F &= ((uchar) flag ^ 0xFF);
+            this->F &= ((uint8_t) flag ^ 0xFF);
     }
 
-    void Cpu::resetFlags(uchar flags) {
+    void Cpu::resetFlags(uint8_t flags) {
         this->F &= (flags ^ 0xFF);
     }
 
-    void Cpu::inc8bSetFlags(uchar result) {
-        this->setFlag(Flag::zf, result == 0x00);
-        this->setFlag(Flag::n, 0);
-        this->setFlag(Flag::h, result == 0x10);
-    }
-
-    void Cpu::dec8bSetFlags(uchar result) {
-        this->setFlag(Flag::zf, result == 0xFF);
-        this->setFlag(Flag::n, 1);
-        this->setFlag(Flag::h, result == 0x0F);
-    }
-
-    void Cpu::add16bSetFlags(ushort result) {
-        this->setFlag(Flag::n, 0);
-        this->setFlag(Flag::h, result == 0x0100);
-        this->setFlag(Flag::cy, result == 0x0000);
-    }
-
-    void Cpu::inc8bRegister(uchar& r) {
+    void Cpu::inc8bRegister(uint8_t& r) {
         r++;
-        this->inc8bSetFlags(r);
+        this->setFlag(Flag::zf, r == 0x00);
+        this->setFlag(Flag::n, 0);
+        this->setFlag(Flag::h, r == 0x10);
     }
 
-    void Cpu::dec8bRegister(uchar& r) {
+    void Cpu::dec8bRegister(uint8_t& r) {
         r--;
-        this->dec8bSetFlags(r);
+        this->setFlag(Flag::zf, r == 0xFF);
+        this->setFlag(Flag::n, 1);
+        this->setFlag(Flag::h, r == 0x0F);
     }
 
-    void Cpu::rl8bRegister(uchar& r) {
+    void Cpu::rl8bRegister(uint8_t& r) {
         bool msb = r >> 7;
-        r = (r << 1) | this->getFlag(Flag::cy);
+        r = ((r << 1) & 0xFF) | this->getFlag(Flag::cy);
         this->setFlag(Flag::cy, msb);
-        this->resetFlags((uchar) Flag::zf | (uchar) Flag::n | (uchar) Flag::h);
+        this->resetFlags((uint8_t) Flag::zf | (uint8_t) Flag::n | (uint8_t) Flag::h);
     }
 
-    void Cpu::rr8bRegister(uchar& r) {
+    void Cpu::rr8bRegister(uint8_t& r) {
         bool lsb = r & 0x01;
-        r = (r >> 1) | (((uchar) this->getFlag(Flag::cy)) << 7);
+        r = (r >> 1) | (this->getFlag(Flag::cy) << 7);
         this->setFlag(Flag::cy, lsb);
-        this->resetFlags((uchar) Flag::zf | (uchar) Flag::n | (uchar) Flag::h);
+        this->resetFlags((uint8_t) Flag::zf | (uint8_t) Flag::n | (uint8_t) Flag::h);
     }
 
-    void Cpu::rlc8bRegister(uchar& r) {
+    void Cpu::rlc8bRegister(uint8_t& r) {
         this->setFlag(Flag::cy, r >> 7);
-        r = (r << 1) | (r >> 7);
-        this->resetFlags((uchar) Flag::zf | (uchar) Flag::n | (uchar) Flag::h);
+        r = ((r << 1) & 0xFF) | (r >> 7);
+        this->resetFlags((uint8_t) Flag::zf | (uint8_t) Flag::n | (uint8_t) Flag::h);
     }
 
-    void Cpu::rrc8bRegister(uchar& r) {
+    void Cpu::rrc8bRegister(uint8_t& r) {
         this->setFlag(Flag::cy, r & 0x01);
         r = (r >> 1) | ((r & 0x01) << 7);
-        this->resetFlags((uchar) Flag::zf | (uchar) Flag::n | (uchar) Flag::h);
+        this->resetFlags((uint8_t) Flag::zf | (uint8_t) Flag::n | (uint8_t) Flag::h);
     }
 
-    void Cpu::inc16bRegister(uchar& r1, uchar& r2) {
+    void Cpu::inc16bRegister(uint8_t& r1, uint8_t& r2) {
         r2++;
         if (!r2)
             r1++;
     }
 
-    void Cpu::dec16bRegister(uchar& r1, uchar& r2) {
+    void Cpu::dec16bRegister(uint8_t& r1, uint8_t& r2) {
         r2--;
         if (r2 == 0xFF)
             r1--;
     }
 
-    void Cpu::mov16bRegister(ushort addr, ushort value) {
+    void Cpu::mov16bRegister(uint16_t addr, uint16_t value) {
         (*this->memory)[addr] = value >> 8;
         (*this->memory)[addr+1] = value & 0x00FF;
     }
 
-    void Cpu::add16bRegisters(uchar& r1, uchar& r2, uchar& r3, uchar& r4) {
-        ushort result = this->joinBytes(r1, r2) + this->joinBytes(r3, r4);
+    void Cpu::add16bRegisters(uint8_t& r1, uint8_t& r2, uint8_t& r3, uint8_t& r4) {
+        uint16_t result = this->joinBytes(r1, r2) + this->joinBytes(r3, r4);
         r1 = result >> 8;
         r2 = result & 0x00FF;
-        this->add16bSetFlags(result);
+        this->setFlag(Flag::n, 0);
+        this->setFlag(Flag::h, result == 0x0100);
+        this->setFlag(Flag::cy, result == 0x0000);
     }
 
-    uchar Cpu::executeInstruction(bool cb, uchar opcode, uchar* args) {
+    uint8_t Cpu::executeInstruction(bool cb, uint8_t opcode, uint8_t* args) {
         if (!cb) {
             switch (opcode) {
             // NOP
@@ -232,7 +211,7 @@ namespace GBEMU {
                 return 4;
             // JR i8
             case 0x18:
-                this->PC += (char) args[0];  // should work to get signed char back
+                this->PC += (int8_t) args[0];  // should work to get signed byte back
                 return 12;
             // ADD HL,DE
             case 0x19:
@@ -265,7 +244,7 @@ namespace GBEMU {
             // JR NZ,i8
             case 0x20:
                 if (!this->getFlag(Flag::zf)) {
-                    this->PC += (char) args[0];
+                    this->PC += (int8_t) args[0];
                     return 12;
                 }
                 return 8;

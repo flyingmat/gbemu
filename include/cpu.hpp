@@ -1,9 +1,8 @@
+#include <cstdint>
+
 namespace GBEMU {
 
-    typedef unsigned char uchar;
-    typedef unsigned short int ushort;
-
-    enum class Flag : uchar {
+    enum class Flag : uint8_t {
         zf = 0x01,
         n  = 0x02,
         h  = 0x04,
@@ -12,42 +11,34 @@ namespace GBEMU {
 
     class Cpu {
     private:
-        uchar A;
-        uchar F;
-        uchar B;
-        uchar C;
-        uchar D;
-        uchar E;
-        uchar H;
-        uchar L;
-        ushort SP;
-        ushort PC;
-        uchar** memory;
-
-        ushort joinBytes(uchar r1, uchar r2);
-        ushort getBC();
-        ushort getDE();
-        ushort getHL();
+        uint8_t A, F;
+        uint8_t B, C;
+        uint8_t D, E;
+        uint8_t H, L;
+        uint16_t SP;
+        uint16_t PC;
+        uint8_t** memory;
+    public:
+        uint16_t joinBytes(uint8_t r1, uint8_t r2);
+        uint16_t getBC();
+        uint16_t getDE();
+        uint16_t getHL();
         bool getFlag(Flag flag);
         void setFlag(Flag flag, bool value);
-        void resetFlags(uchar flags);
-        void inc8bSetFlags(uchar result);
-        void dec8bSetFlags(uchar result);
-        void add16bSetFlags(ushort result);
-        void inc8bRegister(uchar& r);
-        void dec8bRegister(uchar& r);
-        void rl8bRegister(uchar& r);
-        void rr8bRegister(uchar& r);
-        void rlc8bRegister(uchar& r);
-        void rrc8bRegister(uchar& r);
-        void inc16bRegister(uchar& r1, uchar& r2);
-        void dec16bRegister(uchar& r1, uchar& r2);
-        void mov16bRegister(ushort addr, ushort value);
-        void add16bRegisters(uchar& r1, uchar& r2, uchar& r3, uchar& r4);
+        void resetFlags(uint8_t flags);
+        void inc8bRegister(uint8_t& r);
+        void dec8bRegister(uint8_t& r);
+        void rl8bRegister(uint8_t& r);
+        void rr8bRegister(uint8_t& r);
+        void rlc8bRegister(uint8_t& r);
+        void rrc8bRegister(uint8_t& r);
+        void inc16bRegister(uint8_t& r1, uint8_t& r2);
+        void dec16bRegister(uint8_t& r1, uint8_t& r2);
+        void mov16bRegister(uint16_t addr, uint16_t value);
+        void add16bRegisters(uint8_t& r1, uint8_t& r2, uint8_t& r3, uint8_t& r4);
 
-    public:
-        Cpu(uchar*& memory);
+        Cpu(uint8_t*& memory);
         ~Cpu();
-        uchar executeInstruction(bool cb, uchar opcode, uchar* args);
+        uint8_t executeInstruction(bool cb, uint8_t opcode, uint8_t* args);
     };
 }
