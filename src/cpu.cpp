@@ -274,8 +274,24 @@ namespace GBEMU {
             case 0x26:
                 this->H = args[0];
                 return 8;
-            // // DAA
-            // case 0x27:
+            // DAA
+            case 0x27:
+                if (!this->getFlag(Flag::n)) {
+                    if (this->getFlag(Flag::cy) || this->A > 0x99) {
+                        this->A += 0x60;
+                        this->setFlag(Flag::cy, 1);
+                    }
+                    if (this->getFlag(Flag::h) || (this->A & 0x0F) > 0x09)
+                        this->A += 0x06;
+                } else {
+                    if (this->getFlag(Flag::cy))
+                        this->A -= 0x60;
+                    if (this->getFlag(Flag::h))
+                        this->A -= 0x06;
+                }
+                this->setFlag(Flag::zf, this->A == 0);
+                this->setFlag(Flag::h, 0);
+                return 4;
             // // JR Z,i8
             // case 0x28:
             }
