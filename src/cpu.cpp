@@ -219,20 +219,34 @@ namespace GBEMU {
             case 0x17:
                 this->rl8bRegister(this->A);
                 return 4;
-            // // JR i8
-            // case 0x18:
-            // // ADD HL,DE
-            // case 0x19:
-            // // LD A,(DE)
-            // case 0x1A:
-            // // DEC DE
-            // case 0x1B:
-            // // INC E
-            // case 0x1C:
-            // // DEC E
-            // case 0x1D:
-            // // LD E,u8
-            // case 0x1E:
+            // JR i8
+            case 0x18:
+                this->PC += (char) args[0];  // should work to get signed char back
+                return 12;
+            // ADD HL,DE
+            case 0x19:
+                this->add16bRegisters(this->H, this->L, this->D, this->E);
+                return 8;
+            // LD A,(DE)
+            case 0x1A:
+                this->A = (*this->memory)[this->getDE()];
+                return 8;
+            // DEC DE
+            case 0x1B:
+                this->dec16bRegister(this->D, this->E);
+                return 8;
+            // INC E
+            case 0x1C:
+                this->inc8bRegister(this->E);
+                return 4;
+            // DEC E
+            case 0x1D:
+                this->dec8bRegister(this->E);
+                return 4;
+            // LD E,u8
+            case 0x1E:
+                this->E = args[0];
+                return 8;
             // // RRA
             // case 0x1F:
             }
