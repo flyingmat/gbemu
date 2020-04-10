@@ -36,6 +36,7 @@ namespace GBEMU {
         void inc8bRegister(uchar& r);
         void dec8bRegister(uchar& r);
         void rl8bRegister(uchar& r);
+        void rr8bRegister(uchar& r);
         void rlc8bRegister(uchar& r);
         void rrc8bRegister(uchar& r);
         void inc16bRegister(uchar& r1, uchar& r2);

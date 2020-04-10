@@ -83,6 +83,13 @@ namespace GBEMU {
         this->resetFlags((uchar) Flag::zf | (uchar) Flag::n | (uchar) Flag::h);
     }
 
+    void Cpu::rr8bRegister(uchar& r) {
+        bool lsb = r & 0x01;
+        r = (r >> 1) | (((uchar) this->getFlag(Flag::cy)) << 7);
+        this->setFlag(Flag::cy, lsb);
+        this->resetFlags((uchar) Flag::zf | (uchar) Flag::n | (uchar) Flag::h);
+    }
+
     void Cpu::rlc8bRegister(uchar& r) {
         this->setFlag(Flag::cy, r >> 7);
         r = (r << 1) | (r >> 7);
@@ -247,8 +254,10 @@ namespace GBEMU {
             case 0x1E:
                 this->E = args[0];
                 return 8;
-            // // RRA
-            // case 0x1F:
+            // RRA
+            case 0x1F:
+                this->rr8bRegister(this->A);
+                return 4;
             }
         }
 
