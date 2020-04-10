@@ -33,6 +33,10 @@ namespace GBEMU {
         return this->joinBytes(this->D, this->E);
     }
 
+    bool Cpu::getFlag(Flag flag) {
+        return (this->F & (uchar) flag) != 0;
+    }
+
     void Cpu::setFlag(Flag flag, bool value) {
         if (value)
             this->F |= (uchar) flag;
@@ -70,6 +74,13 @@ namespace GBEMU {
     void Cpu::dec8bRegister(uchar& r) {
         r--;
         this->dec8bSetFlags(r);
+    }
+
+    void Cpu::rl8bRegister(uchar& r) {
+        bool msb = r >> 7;
+        r = (r << 1) | this->getFlag(Flag::cy);
+        this->setFlag(Flag::cy, msb);
+        this->resetFlags((uchar) Flag::zf | (uchar) Flag::n | (uchar) Flag::h);
     }
 
     void Cpu::rlc8bRegister(uchar& r) {
@@ -204,8 +215,10 @@ namespace GBEMU {
             case 0x16:
                 this->D = args[0];
                 return 8;
-            // // RLA
-            // case 0x17:
+            // RLA
+            case 0x17:
+                this->rl8bRegister(this->A);
+                return 4;
             // // JR i8
             // case 0x18:
             // // ADD HL,DE

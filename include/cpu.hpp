@@ -27,6 +27,7 @@ namespace GBEMU {
         ushort joinBytes(uchar r1, uchar r2);
         ushort getBC();
         ushort getDE();
+        bool getFlag(Flag flag);
         void setFlag(Flag flag, bool value);
         void resetFlags(uchar flags);
         void inc8bSetFlags(uchar result);
@@ -34,6 +35,7 @@ namespace GBEMU {
         void add16bSetFlags(ushort result);
         void inc8bRegister(uchar& r);
         void dec8bRegister(uchar& r);
+        void rl8bRegister(uchar& r);
         void rlc8bRegister(uchar& r);
         void rrc8bRegister(uchar& r);
         void inc16bRegister(uchar& r1, uchar& r2);
