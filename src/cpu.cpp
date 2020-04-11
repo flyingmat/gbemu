@@ -106,6 +106,13 @@ namespace GBEMU {
         this->adx_8b_SetFlags(r1, real);
     }
 
+    void Cpu::and_8b(uint8_t& r1, uint8_t r2) {
+        r1 &= r2;
+        this->setFlag(Flag::zf, r1 == 0x00);
+        this->resetFlags((uint8_t) Flag::n | (uint8_t) Flag::cy);
+        this->setFlag(Flag::h, 1);
+    }
+
     void Cpu::inc_16b2(uint8_t& r1, uint8_t& r2) {
         r2++;
         if (!r2)
@@ -482,6 +489,38 @@ namespace GBEMU {
             // ADC A,A
             case 0x8F:
                 this->adc_8b(this->A, this->A);
+                return 4;
+            // AND A,B
+            case 0xA0:
+                this->and_8b(this->A, this->B);
+                return 4;
+            // AND A,C
+            case 0xA1:
+                this->and_8b(this->A, this->C);
+                return 4;
+            // AND A,D
+            case 0xA2:
+                this->and_8b(this->A, this->D);
+                return 4;
+            // AND A,E
+            case 0xA3:
+                this->and_8b(this->A, this->E);
+                return 4;
+            // AND A,H
+            case 0xA4:
+                this->and_8b(this->A, this->H);
+                return 4;
+            // AND A,L
+            case 0xA5:
+                this->and_8b(this->A, this->L);
+                return 4;
+            // AND A,(HL)
+            case 0xA6:
+                this->and_8b(this->A, (*this->memory)[this->readHL()]);
+                return 8;
+            // AND A,A
+            case 0xA7:
+                this->and_8b(this->A, this->A);
                 return 4;
             }
         }
