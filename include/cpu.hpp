@@ -43,6 +43,7 @@ namespace GBEMU {
         void adc_8b(uint8_t& r1, uint8_t r2);
         void and_8b(uint8_t& r1, uint8_t r2);
         void xor_8b(uint8_t& r1, uint8_t r2);
+        void or_8b(uint8_t& r1, uint8_t r2);
 
         void inc_16b2(uint8_t& r1, uint8_t& r2);
         void dec_16b2(uint8_t& r1, uint8_t& r2);
