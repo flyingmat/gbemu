@@ -3,7 +3,15 @@
 namespace GBEMU {
 
     Emu::Emu() {
-        GUI::InitInterface();
+        this->memory = new uint8_t [4096];  // arbitrary size
+        this->cpu = new Cpu(this->memory);
+    }
+
+    Emu::~Emu() {
+        delete[] this->memory;
+        delete this->cpu;
+        this->memory = nullptr;
+        this->cpu = nullptr;
     }
 
     int Emu::play() {
@@ -14,8 +22,7 @@ namespace GBEMU {
             SDL_Event event;
             while (SDL_PollEvent(&event)) {
                 ImGui_ImplSDL2_ProcessEvent(&event);
-                if (GUI::ShouldDestroy(event))
-                    done = true;
+                done = GUI::ShouldDestroy(event);
             }
 
             GUI::ImGuiFrameRender();

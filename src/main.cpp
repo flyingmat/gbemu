@@ -6,6 +6,7 @@
 #include "cpu.hpp"
 
 int main() {
+    GBEMU::GUI::InitInterface();
     GBEMU::Emu emulator = GBEMU::Emu();
     emulator.play();
     return 0;

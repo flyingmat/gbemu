@@ -9,7 +9,7 @@ namespace GBEMU::GUI {
     bool InitInterface() {
         if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER) != 0) {
             printf("Error: %s\n", SDL_GetError());
-            return -1;
+            return 1;
         }
 
         const char* glsl_version = "#version 130";
@@ -20,19 +20,29 @@ namespace GBEMU::GUI {
 
         SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_OPENGL | SDL_WINDOW_ALLOW_HIGHDPI);
         window = SDL_CreateWindow("gbemu", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 256, 128, window_flags);
+        if (window == NULL) {
+            printf("Error: %s\n", SDL_GetError());
+            return 1;
+        }
         SDL_GLContext gl_context = SDL_GL_CreateContext(window);
         SDL_GL_MakeCurrent(window, gl_context);
 
-        gl3wInit();
+        if (gl3wInit() != 0) {
+            printf("Failed to initialize gl3w!\n");
+            return 1;
+        }
 
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
-        ImGuiIO& io = ImGui::GetIO();
+        ImGuiIO& io = ImGui::GetIO(); (void) io;
         p_io = &io;
         io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 
-        (void)io;
         ImGui::StyleColorsDark();
+        ImGuiStyle& style = ImGui::GetStyle();
+        style.WindowRounding = 0.0f;
+        style.Colors[ImGuiCol_WindowBg].w = 1.0f;
+
         ImGui_ImplSDL2_InitForOpenGL(window, gl_context);
         ImGui_ImplOpenGL3_Init(glsl_version);
     }
