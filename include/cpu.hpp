@@ -20,27 +20,35 @@ namespace GBEMU {
         uint8_t** memory;
     public:
         uint16_t joinBytes(uint8_t r1, uint8_t r2);
-        uint16_t getBC();
-        uint16_t getDE();
-        uint16_t getHL();
+
+        uint16_t readBC();
+        uint16_t readDE();
+        uint16_t readHL();
+
         bool getFlag(Flag flag);
         void setFlag(Flag flag, bool value);
         void setFlags(uint8_t flags);
         void resetFlags(uint8_t flags);
-        void adx8bSetFlags(uint8_t r, uint16_t real);
-        void inc8b(uint8_t& r);
-        void dec8b(uint8_t& r);
-        void rl8b(uint8_t& r);
-        void rr8b(uint8_t& r);
-        void rlc8b(uint8_t& r);
-        void rrc8b(uint8_t& r);
-        void add8b(uint8_t& r1, uint8_t r2);
-        void adc8b(uint8_t& r1, uint8_t r2);
-        void inc16b2(uint8_t& r1, uint8_t& r2);
-        void dec16b2(uint8_t& r1, uint8_t& r2);
-        void mov16bmem(uint16_t addr, uint16_t value);
-        void add16b2x2(uint8_t& r1, uint8_t& r2, uint8_t r3, uint8_t r4);
-        uint8_t jrConditional(Flag flag, bool value, int8_t jvalue);
+        void adx_8b_SetFlags(uint8_t r, uint16_t real);
+
+        void inc_8b(uint8_t& r);
+        void dec_8b(uint8_t& r);
+
+        void rl_8b(uint8_t& r);
+        void rr_8b(uint8_t& r);
+        void rlc_8b(uint8_t& r);
+        void rrc_8b(uint8_t& r);
+
+        void add_8b(uint8_t& r1, uint8_t r2);
+        void adc_8b(uint8_t& r1, uint8_t r2);
+
+        void inc_16b2(uint8_t& r1, uint8_t& r2);
+        void dec_16b2(uint8_t& r1, uint8_t& r2);
+
+        void mov_16bmem(uint16_t addr, uint16_t value);
+        void add_16b2x2(uint8_t& r1, uint8_t& r2, uint8_t r3, uint8_t r4);
+
+        uint8_t jr_conditional(Flag flag, bool value, int8_t jvalue);
 
         Cpu(uint8_t*& memory);
         ~Cpu();
