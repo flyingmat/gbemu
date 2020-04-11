@@ -113,6 +113,12 @@ namespace GBEMU {
         this->setFlag(Flag::h, 1);
     }
 
+    void Cpu::xor_8b(uint8_t& r1, uint8_t r2) {
+        r1 ^= r2;
+        this->setFlag(Flag::zf, r1 == 0x00);
+        this->resetFlags((uint8_t) Flag::n | (uint8_t) Flag::h | (uint8_t) Flag::cy);
+    }
+
     void Cpu::inc_16b2(uint8_t& r1, uint8_t& r2) {
         r2++;
         if (!r2)
@@ -521,6 +527,38 @@ namespace GBEMU {
             // AND A,A
             case 0xA7:
                 this->and_8b(this->A, this->A);
+                return 4;
+            // XOR A,B
+            case 0xA8:
+                this->xor_8b(this->A, this->B);
+                return 4;
+            // XOR A,C
+            case 0xA9:
+                this->xor_8b(this->A, this->C);
+                return 4;
+            // XOR A,D
+            case 0xAA:
+                this->xor_8b(this->A, this->D);
+                return 4;
+            // XOR A,E
+            case 0xAB:
+                this->xor_8b(this->A, this->E);
+                return 4;
+            // XOR A,H
+            case 0xAC:
+                this->xor_8b(this->A, this->H);
+                return 4;
+            // XOR A,L
+            case 0xAD:
+                this->xor_8b(this->A, this->L);
+                return 4;
+            // XOR A,(HL)
+            case 0xAE:
+                this->xor_8b(this->A, (*this->memory)[this->readHL()]);
+                return 8;
+            // XOR A,A
+            case 0xAF:
+                this->xor_8b(this->A, this->A);
                 return 4;
             }
         }
