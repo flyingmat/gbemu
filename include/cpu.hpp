@@ -30,6 +30,7 @@ namespace GBEMU {
         void setFlags(uint8_t flags);
         void resetFlags(uint8_t flags);
         void adx_8b_SetFlags(uint8_t r, uint16_t real);
+        void sub_8b_SetFlags(uint8_t r, int real);
 
         void inc_8b(uint8_t& r);
         void dec_8b(uint8_t& r);
