@@ -1,9 +1,13 @@
 #include <cstdio>
 #include <cstdint>
+
+#include "emu.hpp"
+#include "gui.hpp"
 #include "cpu.hpp"
 
 int main() {
-    uint8_t* memory = new uint8_t [16];
-    GBEMU::Cpu cpu = GBEMU::Cpu(memory);
+    GBEMU::GUI::InitInterface();
+    GBEMU::Emu emulator = GBEMU::Emu();
+    emulator.play();
     return 0;
 }

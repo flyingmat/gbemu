@@ -24,9 +24,44 @@ namespace GBEMU {
         return (r1 << 8) | r2;
     }
 
+    uint16_t Cpu::readAF() { return this->joinBytes(this->A, this->F); }
     uint16_t Cpu::readBC() { return this->joinBytes(this->B, this->C); }
     uint16_t Cpu::readDE() { return this->joinBytes(this->D, this->E); }
     uint16_t Cpu::readHL() { return this->joinBytes(this->H, this->L); }
+    uint16_t Cpu::readSP() { return this->SP; }
+    uint16_t Cpu::readPC() { return this->PC; }
+
+    uint8_t Cpu::readOpcode() { return (*this->memory)[this->PC]; }
+
+    uint8_t Cpu::getArgN(uint8_t opcode) {
+        uint8_t argn = 0;
+
+        if ((opcode & 0xF0) <= 0x30) {
+            switch (opcode & 0x0F) {
+                case 0x00:
+                    if ((opcode & 0xF0) >= 0x10)
+                        argn = 1;
+                    break;
+                case 0x01:
+                    argn = 2;
+                    break;
+                case 0x06:
+                    argn = 1;
+                    break;
+                case 0x08:
+                    if ((opcode & 0xF0) == 0x00)
+                        argn = 2;
+                    else
+                        argn = 1;
+                    break;
+                case 0x0E:
+                    argn = 1;
+                    break;
+            }
+        } // add more cases
+
+        return argn;
+    }
 
     bool Cpu::getFlag(Flag flag) {
         return (this->F & (uint8_t) flag) != 0;
@@ -54,6 +89,13 @@ namespace GBEMU {
         this->setFlag(Flag::cy, real > 0xFF);
     }
 
+    void Cpu::sub_8b_SetFlags(uint8_t r, int real) {
+        this->setFlag(Flag::zf, r == 0x00);
+        this->setFlag(Flag::n, 1);
+        this->setFlag(Flag::h, r == 0x0F);
+        this->setFlag(Flag::cy, real < 0);
+    }
+
     void Cpu::inc_8b(uint8_t& r) {
         r++;
         this->setFlag(Flag::zf, r == 0x00);
@@ -63,7 +105,7 @@ namespace GBEMU {
 
     void Cpu::dec_8b(uint8_t& r) {
         r--;
-        this->setFlag(Flag::zf, r == 0xFF);
+        this->setFlag(Flag::zf, r == 0x00);
         this->setFlag(Flag::n, 1);
         this->setFlag(Flag::h, r == 0x0F);
     }
@@ -106,6 +148,20 @@ namespace GBEMU {
         this->adx_8b_SetFlags(r1, real);
     }
 
+    void Cpu::sub_8b(uint8_t& r1, uint8_t r2) {
+        int real = r1 - r2;
+        uint8_t result = r1 - r2;
+        r1 = result;
+        this->sub_8b_SetFlags(r1, real);
+    }
+
+    void Cpu::sbc_8b(uint8_t& r1, uint8_t r2) {
+        int real = r1 - (r2 + this->getFlag(Flag::cy));
+        uint8_t result = r1 - (uint8_t) (r2 + this->getFlag(Flag::cy));
+        r1 = result;
+        this->sub_8b_SetFlags(r1, real);
+    }
+
     void Cpu::and_8b(uint8_t& r1, uint8_t r2) {
         r1 &= r2;
         this->setFlag(Flag::zf, r1 == 0x00);
@@ -123,6 +179,12 @@ namespace GBEMU {
         r1 |= r2;
         this->setFlag(Flag::zf, r1 == 0x00);
         this->resetFlags((uint8_t) Flag::n | (uint8_t) Flag::h | (uint8_t) Flag::cy);
+    }
+
+    void Cpu::cp_8b(uint8_t r1, uint8_t r2) {
+        int real = r1 - r2;
+        uint8_t result = r1 - r2;
+        this->sub_8b_SetFlags(result, real);
     }
 
     void Cpu::inc_16b2(uint8_t& r1, uint8_t& r2) {
@@ -160,7 +222,7 @@ namespace GBEMU {
         return 8;
     }
 
-    uint8_t Cpu::executeInstruction(bool cb, uint8_t opcode, uint8_t* args) {
+    uint8_t Cpu::executeInstruction(bool cb, uint8_t opcode, uint8_t args []) {
         if (!cb) {
             switch (opcode) {
             // NOP
@@ -502,6 +564,70 @@ namespace GBEMU {
             case 0x8F:
                 this->adc_8b(this->A, this->A);
                 return 4;
+            // SUB A,B
+            case 0x90:
+                this->sub_8b(this->A, this->B);
+                return 4;
+            // SUB A,C
+            case 0x91:
+                this->sub_8b(this->A, this->C);
+                return 4;
+            // SUB A,D
+            case 0x92:
+                this->sub_8b(this->A, this->D);
+                return 4;
+            // SUB A,E
+            case 0x93:
+                this->sub_8b(this->A, this->E);
+                return 4;
+            // SUB A,H
+            case 0x94:
+                this->sub_8b(this->A, this->H);
+                return 4;
+            // SUB A,L
+            case 0x95:
+                this->sub_8b(this->A, this->L);
+                return 4;
+            // SUB A,(HL)
+            case 0x96:
+                this->sub_8b(this->A, (*this->memory)[this->readHL()]);
+                return 8;
+            // SUB A,A
+            case 0x97:
+                this->sub_8b(this->A, this->A);
+                return 4;
+            // SBC A,B
+            case 0x98:
+                this->sbc_8b(this->A, this->B);
+                return 4;
+            // SBC A,C
+            case 0x99:
+                this->sbc_8b(this->A, this->C);
+                return 4;
+            // SBC A,D
+            case 0x9A:
+                this->sbc_8b(this->A, this->D);
+                return 4;
+            // SBC A,E
+            case 0x9B:
+                this->sbc_8b(this->A, this->E);
+                return 4;
+            // SBC A,H
+            case 0x9C:
+                this->sbc_8b(this->A, this->H);
+                return 4;
+            // SBC A,L
+            case 0x9D:
+                this->sbc_8b(this->A, this->L);
+                return 4;
+            // SBC A,(HL)
+            case 0x9E:
+                this->sbc_8b(this->A, (*this->memory)[this->readHL()]);
+                return 8;
+            // SBC A,A
+            case 0x9F:
+                this->sbc_8b(this->A, this->A);
+                return 4;
             // AND A,B
             case 0xA0:
                 this->and_8b(this->A, this->B);
@@ -598,9 +724,53 @@ namespace GBEMU {
             case 0xB7:
                 this->or_8b(this->A, this->A);
                 return 4;
+            // CP A,B
+            case 0xB8:
+                this->cp_8b(this->A, this->B);
+                return 4;
+            // CP A,C
+            case 0xB9:
+                this->cp_8b(this->A, this->C);
+                return 4;
+            // CP A,D
+            case 0xBA:
+                this->cp_8b(this->A, this->D);
+                return 4;
+            // CP A,E
+            case 0xBB:
+                this->cp_8b(this->A, this->E);
+                return 4;
+            // CP A,H
+            case 0xBC:
+                this->cp_8b(this->A, this->H);
+                return 4;
+            // CP A,L
+            case 0xBD:
+                this->cp_8b(this->A, this->L);
+                return 4;
+            // CP A,(HL)
+            case 0xBE:
+                this->cp_8b(this->A, (*this->memory)[this->readHL()]);
+                return 8;
+            // CP A,A
+            case 0xBF:
+                this->cp_8b(this->A, this->A);
+                return 4;
             }
         }
 
         return 0;
+    }
+
+    void Cpu::cycle() {
+        uint8_t opcode = this->readOpcode();
+        uint8_t argn = this->getArgN(opcode);
+        uint8_t args [argn];
+        for (uint8_t i = 0; i <= argn; i++)
+            args[i] = (*this->memory)[this->PC + i + 1];
+
+        this->executeInstruction(0, opcode, args);
+
+        this->PC += argn + 1;
     }
 }

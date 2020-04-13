@@ -1,4 +1,6 @@
+#pragma once
 #include <cstdint>
+#include <cstdio>
 
 namespace GBEMU {
 
@@ -21,15 +23,19 @@ namespace GBEMU {
     public:
         uint16_t joinBytes(uint8_t r1, uint8_t r2);
 
+        uint16_t readAF();
         uint16_t readBC();
         uint16_t readDE();
         uint16_t readHL();
+        uint16_t readSP();
+        uint16_t readPC();
 
         bool getFlag(Flag flag);
         void setFlag(Flag flag, bool value);
         void setFlags(uint8_t flags);
         void resetFlags(uint8_t flags);
         void adx_8b_SetFlags(uint8_t r, uint16_t real);
+        void sub_8b_SetFlags(uint8_t r, int real);
 
         void inc_8b(uint8_t& r);
         void dec_8b(uint8_t& r);
@@ -41,9 +47,12 @@ namespace GBEMU {
 
         void add_8b(uint8_t& r1, uint8_t r2);
         void adc_8b(uint8_t& r1, uint8_t r2);
+        void sub_8b(uint8_t& r1, uint8_t r2);
+        void sbc_8b(uint8_t& r1, uint8_t r2);
         void and_8b(uint8_t& r1, uint8_t r2);
         void xor_8b(uint8_t& r1, uint8_t r2);
         void or_8b(uint8_t& r1, uint8_t r2);
+        void cp_8b(uint8_t r1, uint8_t r2);
 
         void inc_16b2(uint8_t& r1, uint8_t& r2);
         void dec_16b2(uint8_t& r1, uint8_t& r2);
@@ -55,6 +64,9 @@ namespace GBEMU {
 
         Cpu(uint8_t*& memory);
         ~Cpu();
-        uint8_t executeInstruction(bool cb, uint8_t opcode, uint8_t* args);
+        uint8_t readOpcode();
+        uint8_t getArgN(uint8_t opcode);
+        uint8_t executeInstruction(bool cb, uint8_t opcode, uint8_t* argv);
+        void cycle();
     };
 }
