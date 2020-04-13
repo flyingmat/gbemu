@@ -24,9 +24,44 @@ namespace GBEMU {
         return (r1 << 8) | r2;
     }
 
+    uint16_t Cpu::readAF() { return this->joinBytes(this->A, this->F); }
     uint16_t Cpu::readBC() { return this->joinBytes(this->B, this->C); }
     uint16_t Cpu::readDE() { return this->joinBytes(this->D, this->E); }
     uint16_t Cpu::readHL() { return this->joinBytes(this->H, this->L); }
+    uint16_t Cpu::readSP() { return this->SP; }
+    uint16_t Cpu::readPC() { return this->PC; }
+
+    uint8_t Cpu::readOpcode() { return (*this->memory)[this->PC]; }
+
+    uint8_t Cpu::getArgN(uint8_t opcode) {
+        uint8_t argn = 0;
+
+        if ((opcode & 0xF0) <= 0x30) {
+            switch (opcode & 0x0F) {
+                case 0x00:
+                    if ((opcode & 0xF0) >= 0x10)
+                        argn = 1;
+                    break;
+                case 0x01:
+                    argn = 2;
+                    break;
+                case 0x06:
+                    argn = 1;
+                    break;
+                case 0x08:
+                    if ((opcode & 0xF0) == 0x00)
+                        argn = 2;
+                    else
+                        argn = 1;
+                    break;
+                case 0x0E:
+                    argn = 1;
+                    break;
+            }
+        } // add more cases
+
+        return argn;
+    }
 
     bool Cpu::getFlag(Flag flag) {
         return (this->F & (uint8_t) flag) != 0;
@@ -70,7 +105,7 @@ namespace GBEMU {
 
     void Cpu::dec_8b(uint8_t& r) {
         r--;
-        this->setFlag(Flag::zf, r == 0xFF);
+        this->setFlag(Flag::zf, r == 0x00);
         this->setFlag(Flag::n, 1);
         this->setFlag(Flag::h, r == 0x0F);
     }
@@ -187,7 +222,7 @@ namespace GBEMU {
         return 8;
     }
 
-    uint8_t Cpu::executeInstruction(bool cb, uint8_t opcode, uint8_t* args) {
+    uint8_t Cpu::executeInstruction(bool cb, uint8_t opcode, uint8_t args []) {
         if (!cb) {
             switch (opcode) {
             // NOP
@@ -725,5 +760,17 @@ namespace GBEMU {
         }
 
         return 0;
+    }
+
+    void Cpu::cycle() {
+        uint8_t opcode = this->readOpcode();
+        uint8_t argn = this->getArgN(opcode);
+        uint8_t args [argn];
+        for (uint8_t i = 0; i <= argn; i++)
+            args[i] = (*this->memory)[this->PC + i + 1];
+
+        this->executeInstruction(0, opcode, args);
+
+        this->PC += argn + 1;
     }
 }

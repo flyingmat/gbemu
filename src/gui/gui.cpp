@@ -47,12 +47,57 @@ namespace GBEMU::GUI {
         ImGui_ImplOpenGL3_Init(glsl_version);
     }
 
-    void ImGuiFrameRender() {
+    void ImGuiFrameRender(GBEMU::Cpu* cpu, uint8_t* memory) {
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplSDL2_NewFrame(window);
         ImGui::NewFrame();
 
-        ImGui::ShowDemoWindow();
+        bool p_open = true;
+        ImGui::Begin("debug", &p_open, 0);
+
+        std::stringstream hexss;
+
+        std::string AF = std::bitset<16>(cpu->readAF()).to_string();
+        std::string BC = std::bitset<16>(cpu->readBC()).to_string();
+        std::string DE = std::bitset<16>(cpu->readDE()).to_string();
+        std::string HL = std::bitset<16>(cpu->readHL()).to_string();
+        std::string SP = std::bitset<16>(cpu->readSP()).to_string();
+        std::string PC = std::bitset<16>(cpu->readPC()).to_string();
+
+        uint8_t opcode = cpu->readOpcode();
+        hexss << std::hex << std::setfill('0') << std::setw(2) << std::bitset<8>(opcode).to_ulong();
+
+        uint8_t argn = cpu->getArgN(opcode);
+        for (uint8_t i = 1; i <= argn; i++)
+            hexss << " " <<  std::hex << std::setfill('0') << std::setw(2) << std::bitset<8>(memory[cpu->readPC() + i]).to_ulong();
+
+        std::string instr = hexss.str();
+
+        ImGui::Text("registers");
+        ImGui::Text("AF: ");
+        ImGui::SameLine();
+        ImGui::Text(AF.c_str());
+        ImGui::Text("BC: ");
+        ImGui::SameLine();
+        ImGui::Text(BC.c_str());
+        ImGui::Text("DE: ");
+        ImGui::SameLine();
+        ImGui::Text(DE.c_str());
+        ImGui::Text("HL: ");
+        ImGui::SameLine();
+        ImGui::Text(HL.c_str());
+        ImGui::Text("");
+        ImGui::Text("SP: ");
+        ImGui::SameLine();
+        ImGui::Text(SP.c_str());
+        ImGui::Text("PC: ");
+        ImGui::SameLine();
+        ImGui::Text(PC.c_str());
+        ImGui::Text("@ ");
+        ImGui::SameLine();
+        ImGui::Text(instr.c_str());
+
+        ImGui::End();
 
         ImGui::Render();
         glViewport(0, 0, (int)p_io->DisplaySize.x, (int)p_io->DisplaySize.y);

@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdint>
+#include <cstdio>
 
 namespace GBEMU {
 
@@ -22,9 +23,12 @@ namespace GBEMU {
     public:
         uint16_t joinBytes(uint8_t r1, uint8_t r2);
 
+        uint16_t readAF();
         uint16_t readBC();
         uint16_t readDE();
         uint16_t readHL();
+        uint16_t readSP();
+        uint16_t readPC();
 
         bool getFlag(Flag flag);
         void setFlag(Flag flag, bool value);
@@ -60,6 +64,9 @@ namespace GBEMU {
 
         Cpu(uint8_t*& memory);
         ~Cpu();
-        uint8_t executeInstruction(bool cb, uint8_t opcode, uint8_t* args);
+        uint8_t readOpcode();
+        uint8_t getArgN(uint8_t opcode);
+        uint8_t executeInstruction(bool cb, uint8_t opcode, uint8_t* argv);
+        void cycle();
     };
 }
