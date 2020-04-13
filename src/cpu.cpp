@@ -89,7 +89,7 @@ namespace GBEMU {
         this->setFlag(Flag::cy, real > 0xFF);
     }
 
-    void Cpu::sub_8b_SetFlags(uint8_t r, int real) {
+    void Cpu::sub_8b_SetFlags(uint8_t r, int16_t real) {
         this->setFlag(Flag::zf, r == 0x00);
         this->setFlag(Flag::n, 1);
         this->setFlag(Flag::h, r == 0x0F);
@@ -149,14 +149,14 @@ namespace GBEMU {
     }
 
     void Cpu::sub_8b(uint8_t& r1, uint8_t r2) {
-        int real = r1 - r2;
+        int16_t real = r1 - r2;
         uint8_t result = r1 - r2;
         r1 = result;
         this->sub_8b_SetFlags(r1, real);
     }
 
     void Cpu::sbc_8b(uint8_t& r1, uint8_t r2) {
-        int real = r1 - (r2 + this->getFlag(Flag::cy));
+        int16_t real = r1 - (r2 + this->getFlag(Flag::cy));
         uint8_t result = r1 - (uint8_t) (r2 + this->getFlag(Flag::cy));
         r1 = result;
         this->sub_8b_SetFlags(r1, real);
@@ -199,6 +199,16 @@ namespace GBEMU {
             r1--;
     }
 
+    void Cpu::pop_16b2(uint8_t& r1, uint8_t& r2) {
+        r2 = (*this->memory)[this->SP++];
+        r1 = (*this->memory)[this->SP++];
+    }
+
+    void Cpu::push_16b2(uint8_t r1, uint8_t r2) {
+        (*this->memory)[--this->SP] = r1;
+        (*this->memory)[--this->SP] = r2;
+    }
+
     void Cpu::mov_16bmem(uint16_t addr, uint16_t value) {
         (*this->memory)[addr] = value >> 8;
         (*this->memory)[addr+1] = value & 0x00FF;
@@ -216,10 +226,46 @@ namespace GBEMU {
 
     uint8_t Cpu::jr_conditional(Flag flag, bool value, int8_t jvalue) {
         if (this->getFlag(flag) == value) {
-            this->PC += jvalue;
+            this->PC += jvalue - 2;  // 1 arg + 1
             return 12;
         }
         return 8;
+    }
+
+    uint8_t Cpu::jp_conditional(Flag flag, bool value, uint8_t b1, uint8_t b2) {
+        if (this->getFlag(flag) == value) {
+            uint16_t addr = this->joinBytes(b1, b2);
+            this->PC = addr - 3;  // 2 args + 1
+            return 24;
+        }
+        return 12;
+    }
+
+    uint8_t Cpu::call_conditional(Flag flag, bool value, uint8_t b1, uint8_t b2) {
+        if (this->getFlag(flag) == value) {
+            (*this->memory)[--this->SP] = (this->PC + 3) >> 8;
+            (*this->memory)[--this->SP] = (this->PC + 3) & 0x00FF;
+            uint16_t addr = this->joinBytes(b1, b2);
+            this->PC = addr - 3;  // 2 args + 1
+            return 16;
+        }
+        return 12;
+    }
+
+    uint8_t Cpu::ret_conditional(Flag flag, bool value) {
+        if (this->getFlag(flag) == value) {
+            this->PC = (*this->memory)[this->SP++];
+            this->PC |= (*this->memory)[this->SP++] << 8;  // SP is increased (upside down)
+            this->PC--;
+            return 20;
+        }
+        return 8;
+    }
+
+    void Cpu::rst(uint8_t n) {
+        (*this->memory)[--this->SP] = (this->PC) >> 8;
+        (*this->memory)[--this->SP] = (this->PC) & 0x00FF;
+        this->PC = n - 1;
     }
 
     uint8_t Cpu::executeInstruction(bool cb, uint8_t opcode, uint8_t args []) {
@@ -756,6 +802,35 @@ namespace GBEMU {
             case 0xBF:
                 this->cp_8b(this->A, this->A);
                 return 4;
+            // RET NZ
+            case 0xC0:
+                return this->ret_conditional(Flag::zf, 0);
+            // POP BC
+            case 0xC1:
+                this->pop_16b2(this->B, this->C);
+                return 12;
+            // JP NZ,u16
+            case 0xC2:
+                return this->jp_conditional(Flag::zf, 0, args[0], args[1]);
+            // JP u16
+            case 0xC3:
+                this->PC = this->joinBytes(args[0], args[1]) - 3;
+                return 16;
+            // CALL NZ,u16
+            case 0xC4:
+                return this->call_conditional(Flag::zf, 0, args[0], args[1]);
+            // PUSH BC
+            case 0xC5:
+                this->push_16b2(this->B, this->C);
+                return 16;
+            // ADD A,u8
+            case 0xC6:
+                this->add_8b(this->A, args[0]);
+                return 8;
+            // RST 00h
+            case 0xC7:
+                this->rst(0x00);
+                return 16;
             }
         }
 

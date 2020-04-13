@@ -35,7 +35,7 @@ namespace GBEMU {
         void setFlags(uint8_t flags);
         void resetFlags(uint8_t flags);
         void adx_8b_SetFlags(uint8_t r, uint16_t real);
-        void sub_8b_SetFlags(uint8_t r, int real);
+        void sub_8b_SetFlags(uint8_t r, int16_t real);
 
         void inc_8b(uint8_t& r);
         void dec_8b(uint8_t& r);
@@ -56,11 +56,18 @@ namespace GBEMU {
 
         void inc_16b2(uint8_t& r1, uint8_t& r2);
         void dec_16b2(uint8_t& r1, uint8_t& r2);
+        void pop_16b2(uint8_t& r1, uint8_t& r2);
+        void push_16b2(uint8_t r1, uint8_t r2);
 
         void mov_16bmem(uint16_t addr, uint16_t value);
         void add_16b2x2(uint8_t& r1, uint8_t& r2, uint8_t r3, uint8_t r4);
 
         uint8_t jr_conditional(Flag flag, bool value, int8_t jvalue);
+        uint8_t jp_conditional(Flag flag, bool value, uint8_t b1, uint8_t b2);
+        uint8_t call_conditional(Flag flag, bool value, uint8_t b1, uint8_t b2);
+        uint8_t ret_conditional(Flag flag, bool value);
+
+        void rst(uint8_t n);
 
         Cpu(uint8_t*& memory);
         ~Cpu();
