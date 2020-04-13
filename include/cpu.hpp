@@ -5,10 +5,10 @@
 namespace GBEMU {
 
     enum class Flag : uint8_t {
-        zf = 0x01,
-        n  = 0x02,
-        h  = 0x04,
-        cy = 0x08
+        zf = 0x80,
+        n  = 0x40,
+        h  = 0x20,
+        cy = 0x10
     };
 
     class Cpu {
