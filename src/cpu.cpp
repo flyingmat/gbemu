@@ -54,6 +54,13 @@ namespace GBEMU {
         this->setFlag(Flag::cy, real > 0xFF);
     }
 
+    void Cpu::sub_8b_SetFlags(uint8_t r, int real) {
+        this->setFlag(Flag::nz, r == 0x00);
+        this->setFlag(Flag::n, 1);
+        this->setFlag(Flag::h, r == 0x0F);
+        this->setFlag(Flag::cy, real < 0);
+    }
+
     void Cpu::inc_8b(uint8_t& r) {
         r++;
         this->setFlag(Flag::zf, r == 0x00);
@@ -106,6 +113,20 @@ namespace GBEMU {
         this->adx_8b_SetFlags(r1, real);
     }
 
+    void Cpu::sub_8b(uint8_t& r1, uint8_t r2) {
+        int real = r1 - r2;
+        uint8_t result = r1 - r2;
+        r1 = result;
+        this->sub_8b_SetFlags(r1, real);
+    }
+
+    void Cpu::sbc_8b(uint8_t& r1, uint8_t r2) {
+        int real = r1 - (r2 + this->getFlag(Flag::cy));
+        uint8_t result = r1 - (uint8_t) (r2 + this->getFlag(Flag::cy));
+        r1 = result;
+        this->sub_8b_SetFlags(r1, real);
+    }
+
     void Cpu::and_8b(uint8_t& r1, uint8_t r2) {
         r1 &= r2;
         this->setFlag(Flag::zf, r1 == 0x00);
@@ -123,6 +144,12 @@ namespace GBEMU {
         r1 |= r2;
         this->setFlag(Flag::zf, r1 == 0x00);
         this->resetFlags((uint8_t) Flag::n | (uint8_t) Flag::h | (uint8_t) Flag::cy);
+    }
+
+    void Cpu::cp_8b(uint8_t r1, uint8_t r2) {
+        int real = r1 - r2;
+        uint8_t result = r1 - r2;
+        this->sub_8b_SetFlags(result, real);
     }
 
     void Cpu::inc_16b2(uint8_t& r1, uint8_t& r2) {
