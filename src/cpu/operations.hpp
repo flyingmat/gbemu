@@ -1,6 +1,9 @@
 #pragma once
 #include <cstdint>
-#include "cpu.hpp"
+
+namespace GB_Cpu {
+    class Cpu;
+}
 
 namespace GB_Cpu::Operations {
     /**

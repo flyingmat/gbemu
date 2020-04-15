@@ -1,5 +1,6 @@
-#include "operations.hpp"
 #include <cstdio>
+#include "operations.hpp"
+#include "cpu.hpp"
 
 namespace GB_Cpu::Operations {
     // const member variables are initialized and the step index is set to 0
@@ -120,13 +121,4 @@ namespace GB_Cpu::Operations {
                 return true;
         }
     }
-}
-
-int main() {
-    GB_Cpu::Cpu cpu = GB_Cpu::Cpu();
-    uint8_t b = 0xF0;
-    GB_Cpu::Operations::RotateLeftByte op = GB_Cpu::Operations::RotateLeftByte(&cpu, 0, b, 0);
-    op.Execute();
-    printf("%02x", op.byte);
-    return 0;
 }
