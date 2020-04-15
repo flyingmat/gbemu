@@ -1,11 +1,10 @@
 #include "operations.hpp"
+#include <cstdio>
 
 namespace GB_Cpu::Operations {
     // const member variables are initialized and the step index is set to 0
     Operation::Operation(Cpu* const cpu, const uint8_t opcode)
-        : cpu(cpu), opcode(opcode) {
-        this->step_i = 0;
-    }
+        : cpu(cpu), opcode(opcode) { this->step_i = 0; }
 
     // all remaining sub-operations are executed
     void Operation::Execute() {
@@ -22,7 +21,7 @@ namespace GB_Cpu::Operations {
 
     // call base constructor
     IncreaseByte::IncreaseByte(Cpu* const cpu, const uint8_t opcode, uint8_t& byte)
-            : SingleByteEditOperation(cpu, opcode, byte) {}
+        : SingleByteEditOperation(cpu, opcode, byte) {}
 
     // set the z, n, h flags
     void IncreaseByte::SetFlags() {
@@ -48,7 +47,7 @@ namespace GB_Cpu::Operations {
 
     // call base constructor
     DecreaseByte::DecreaseByte(Cpu* const cpu, const uint8_t opcode, uint8_t& byte)
-            : SingleByteEditOperation(cpu, opcode, byte) {};
+        : SingleByteEditOperation(cpu, opcode, byte) {}
 
     // set the z, n, h flags
     void DecreaseByte::SetFlags() {
@@ -65,6 +64,35 @@ namespace GB_Cpu::Operations {
             // only one step: the referenced byte is decreased and flags are set
             case 0:
                 this->byte--;
+                this->SetFlags();
+                return true;
+            default:
+                return true;
+        }
+    }
+
+    RotateLeftByte::RotateLeftByte(Cpu* const cpu, const uint8_t opcode, uint8_t& byte, bool fast)
+        : SingleByteEditOperation(cpu, opcode, byte) { this-> fast = fast; }
+
+    void RotateLeftByte::SetFlags() {
+        // the zero flag is only set if fast is not set
+        this->cpu->SetFlag(Flag::z, (this->byte == 0) & !this->fast);
+        // n and h are always reset
+        this->cpu->SetFlag(Flag::n, 0);
+        this->cpu->SetFlag(Flag::h, 0);
+        // the carry flag is set to the bit going out left (now bit zero)
+        this->cpu->SetFlag(Flag::c, this->byte & 0x01);
+    }
+
+    bool RotateLeftByte::Step() {
+        // if fast is set, only case 1 will be executed
+        // step_i could also be initialized to 1 if flag is set
+        switch (this->step_i++ ^ (uint8_t) this->fast) {
+            case 0:
+                return false;
+            case 1:
+                // rotate the byte to the left and set flags
+                byte = ((byte << 1) & 0xFF) | (byte >> 7);
                 this->SetFlags();
                 return true;
             default:
@@ -92,4 +120,13 @@ namespace GB_Cpu::Operations {
                 return true;
         }
     }
+}
+
+int main() {
+    GB_Cpu::Cpu cpu = GB_Cpu::Cpu();
+    uint8_t b = 0xF0;
+    GB_Cpu::Operations::RotateLeftByte op = GB_Cpu::Operations::RotateLeftByte(&cpu, 0, b, 0);
+    op.Execute();
+    printf("%02x", op.byte);
+    return 0;
 }

@@ -58,11 +58,14 @@ namespace GB_Cpu::Operations {
         virtual bool Step();
     };
 
+    /// Rotates a byte to the left, setting related flags.
     class RotateLeftByte : public SingleByteEditOperation {
     private:
         virtual void SetFlags();
     public:
-        RotateLeftByte(Cpu* const cpu, const uint8_t opcode, uint8_t& byte);
+        bool fast;
+
+        RotateLeftByte(Cpu* const cpu, const uint8_t opcode, uint8_t& byte, bool fast);
         virtual bool Step();
     };
 
