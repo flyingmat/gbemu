@@ -38,18 +38,14 @@ namespace GB_Cpu {
 
 int main() {
     uint8_t* memory = new uint8_t [4096];
-    memory[0] = 0x34;
-    memory[0x10] = 0x03;
+    memory[0] = 0x07 + 0x08;
 
     GB_Cpu::Cpu cpu = GB_Cpu::Cpu(&memory);
-    cpu.L = 0x10;
-    uint8_t* a = GB_Cpu::Helpers::DereferenceHL(&cpu);
-    printf("%02x\n", *a);
-    printf("%02x\n", memory[0x0010]);
+    cpu.A = 0x35;
     cpu.Cycle();
-    printf("%02x\n", *a);
-    printf("%02x\n", memory[0x0010]);
+    printf("%02x\n", cpu.A);
     printf("%02x\n", cpu.F);
+
     delete [] memory;
     return 0;
 }

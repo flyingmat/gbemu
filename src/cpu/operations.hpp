@@ -61,14 +61,20 @@ namespace GB_Cpu::Operations {
         virtual bool Step();
     };
 
-    /// Rotates a byte to the left, setting related flags.
-    class RotateLeftByte : public SingleByteEditOperation {
+    enum ShiftDirection : bool {
+        Left,
+        Right
+    };
+
+    /// Rotates a byte in the specified direction, setting related flags.
+    class RotateByte : public SingleByteEditOperation {
     private:
         virtual void SetFlags();
     public:
-        bool fast;
+        const ShiftDirection direction;
+        const bool fast;
 
-        RotateLeftByte(Cpu* const cpu, const uint8_t opcode, uint8_t& byte, bool fast);
+        RotateByte(Cpu* const cpu, const uint8_t opcode, uint8_t& byte, ShiftDirection direction, bool fast);
         virtual bool Step();
     };
 

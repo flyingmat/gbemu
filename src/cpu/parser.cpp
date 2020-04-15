@@ -24,9 +24,15 @@ namespace GB_Cpu {
         if (upper_hb < 0x04) {
             switch (lower_hb % 8) {
                 case 0x04:
-                    return std::make_unique<Operations::IncreaseByte>(this->cpu, opcode, *this->ChooseOperandByte((opcode - 4) >> 3));
+                    return std::make_unique<Operations::IncreaseByte>(
+                        this->cpu, opcode, *this->ChooseOperandByte((opcode - 4) >> 3));
                 case 0x05:
-                    return std::make_unique<Operations::DecreaseByte>(this->cpu, opcode, *this->ChooseOperandByte((opcode - 5) >> 3));
+                    return std::make_unique<Operations::DecreaseByte>(
+                        this->cpu, opcode, *this->ChooseOperandByte((opcode - 5) >> 3));
+                case 0x07:
+                    if (upper_hb < 0x01)
+                        return std::make_unique<Operations::RotateByte>(
+                            this->cpu, opcode, this->cpu->A, static_cast<Operations::ShiftDirection>((opcode - 7) % 7 % 2), 1);
             }
         }
 

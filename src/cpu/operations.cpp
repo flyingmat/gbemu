@@ -72,20 +72,23 @@ namespace GB_Cpu::Operations {
         }
     }
 
-    RotateLeftByte::RotateLeftByte(Cpu* const cpu, const uint8_t opcode, uint8_t& byte, bool fast)
-        : SingleByteEditOperation(cpu, opcode, byte) { this-> fast = fast; }
+    RotateByte::RotateByte(Cpu* const cpu, const uint8_t opcode, uint8_t& byte, ShiftDirection direction, bool fast)
+        : SingleByteEditOperation(cpu, opcode, byte), direction(direction), fast(fast) {}
 
-    void RotateLeftByte::SetFlags() {
+    void RotateByte::SetFlags() {
         // the zero flag is only set if fast is not set
         this->cpu->SetFlag(Flag::z, (this->byte == 0) & !this->fast);
         // n and h are always reset
         this->cpu->SetFlag(Flag::n, 0);
         this->cpu->SetFlag(Flag::h, 0);
         // the carry flag is set to the bit going out left (now bit zero)
-        this->cpu->SetFlag(Flag::c, this->byte & 0x01);
+        if (this->direction == ShiftDirection::Left)
+            this->cpu->SetFlag(Flag::c, this->byte & 0x01);
+        else
+            this->cpu->SetFlag(Flag::c, this->byte >> 7);
     }
 
-    bool RotateLeftByte::Step() {
+    bool RotateByte::Step() {
         // if fast is set, only case 1 will be executed
         // step_i could also be initialized to 1 if flag is set
         switch (this->step_i++ ^ (uint8_t) this->fast) {
@@ -93,7 +96,10 @@ namespace GB_Cpu::Operations {
                 return false;
             case 1:
                 // rotate the byte to the left and set flags
-                byte = ((byte << 1) & 0xFF) | (byte >> 7);
+                if (this->direction == ShiftDirection::Left)
+                    byte = ((byte << 1) & 0xFF) | (byte >> 7);
+                else
+                    byte = (byte >> 1) | ((byte & 0x01) << 7);
                 this->SetFlags();
                 return true;
             default:
