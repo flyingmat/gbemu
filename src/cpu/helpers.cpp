@@ -7,7 +7,7 @@ namespace GB_Cpu::Helpers {
     }
 
     uint8_t* DereferenceHL(Cpu* const cpu) {
-        return &(*cpu->memory)[JoinBytes(cpu->H, cpu->L)];
+        return *cpu->memory + JoinBytes(cpu->H, cpu->L);
     }
 
     uint8_t GetArgsNumber(uint8_t opcode) {
