@@ -1,13 +1,12 @@
 #include <cstdio>
 #include <cstdint>
+#include <memory>
 
 #include "emu.hpp"
-#include "gui.hpp"
-#include "cpu.hpp"
 
 int main() {
-    GBEMU::GUI::InitInterface();
-    GBEMU::Emu emulator = GBEMU::Emu();
-    emulator.play();
+    Gui::InitInterface();
+    std::unique_ptr<Emu> emulator = std::make_unique<Emu>();
+    emulator->Play();
     return 0;
 }

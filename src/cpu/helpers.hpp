@@ -1,11 +1,11 @@
 #pragma once
 #include <cstdint>
 
-namespace GB_Cpu {
+namespace Cpu {
     class Cpu;
 }
 
-namespace GB_Cpu::Helpers {
+namespace Cpu::Helpers {
     /// Concatenates two bytes to form a 16-bit unsigned integer.
     uint16_t JoinBytes(uint8_t upper_byte, uint8_t lower_byte);
 

@@ -4,6 +4,7 @@
 #include <string>
 #include <iomanip>
 #include <bitset>
+#include <memory>
 
 #include <SDL2/SDL.h>
 #include <gl3w.h>
@@ -12,12 +13,12 @@
 #include "imgui_impl_sdl.h"
 #include "imgui_impl_opengl3.h"
 
-#include "cpu.hpp"
+#include "../cpu/cpu.hpp"
 
-namespace GBEMU::GUI {
+namespace Gui {
 
     bool InitInterface();
-    void ImGuiFrameRender(GBEMU::Cpu* cpu, uint8_t* memory);
+    void ImGuiFrameRender(Cpu::Cpu* const cpu, uint8_t* const memory, std::shared_ptr<Cpu::Operations::Operation> operation);
     bool ShouldDestroy(SDL_Event event);
     void DestroyInterface();
 

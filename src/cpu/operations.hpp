@@ -1,11 +1,11 @@
 #pragma once
 #include <cstdint>
 
-namespace GB_Cpu {
+namespace Cpu {
     class Cpu;
 }
 
-namespace GB_Cpu::Operations {
+namespace Cpu::Operations {
     /**
      * A generic CPU operation. Must be derived to be used.
      * Each time Step() is called, a sub-operation ("microcode") is executed.

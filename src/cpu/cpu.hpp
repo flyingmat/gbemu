@@ -5,7 +5,7 @@
 #include "helpers.hpp"
 #include "operations.hpp"
 
-namespace GB_Cpu {
+namespace Cpu {
     enum class Flag : uint8_t {
         z = 0x80,
         n = 0x40,
@@ -27,6 +27,6 @@ namespace GB_Cpu {
 
         Cpu(uint8_t** const memory);
         void SetFlag(Flag flag, bool flag_value);
-        void Cycle();
+        std::shared_ptr<Operations::Operation> Cycle();
     };
 }

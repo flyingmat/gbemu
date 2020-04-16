@@ -2,7 +2,7 @@
 #include "operations.hpp"
 #include "cpu.hpp"
 
-namespace GB_Cpu::Operations {
+namespace Cpu::Operations {
     // const member variables are initialized and the step index is set to 0
     Operation::Operation(Cpu* const cpu, const uint8_t opcode)
         : cpu(cpu), opcode(opcode) { this->step_i = 0; }

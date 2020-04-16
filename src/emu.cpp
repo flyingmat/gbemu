@@ -1,44 +1,43 @@
 #include "emu.hpp"
 
-namespace GBEMU {
+Emu::Emu() {
+    this->memory = new uint8_t [32768];  // arbitrary size
 
-    Emu::Emu() {
-        this->memory = new uint8_t [32768];  // arbitrary size
+    this->cpu = std::make_unique<Cpu::Cpu>(&this->memory);
 
-        this->cpu = new Cpu(this->memory);
+    // testing
+    this->memory[0] = 0x0C;
+    this->memory[1] = 0x41;
 
-        // testing
-        for (uint16_t i = 0; i < 0xFF; i++)
-            this->memory[i] = i+1;
-    }
+    for (size_t i = 0; i < 10; i++)
+        printf("%02x\n", this->memory[i]);
+}
 
-    Emu::~Emu() {
-        delete[] this->memory;
-        delete this->cpu;
-        this->memory = nullptr;
-        this->cpu = nullptr;
-    }
+Emu::~Emu() {
+    delete[] this->memory;
+    this->memory = nullptr;
+    this->cpu = nullptr;
+}
 
-    int Emu::play() {
-        int out = 0;
+int Emu::Play() {
+    int error = 0;
 
-        bool done = false;
-        while (!done) {
-            SDL_Event event;
-            while (SDL_PollEvent(&event)) {
-                ImGui_ImplSDL2_ProcessEvent(&event);
-                done = GUI::ShouldDestroy(event);
+    bool done = false;
+    std::shared_ptr<Cpu::Operations::Operation> operation = nullptr;
+    while (!done) {
+        SDL_Event event;
+        while (SDL_PollEvent(&event)) {
+            ImGui_ImplSDL2_ProcessEvent(&event);
+            done = Gui::ShouldDestroy(event);
 
-                if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_n)
-                    this->cpu->cycle();
-            }
-
-            GUI::ImGuiFrameRender(this->cpu, this->memory);
+            if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_n)
+                operation = this->cpu->Cycle();
         }
 
-        GUI::DestroyInterface();
-
-        return out;
+        Gui::ImGuiFrameRender(this->cpu.get(), this->memory, operation);
     }
 
+    Gui::DestroyInterface();
+
+    return error;
 }

@@ -1,6 +1,6 @@
 #include "cpu.hpp"
 
-namespace GB_Cpu {
+namespace Cpu {
     Cpu::Cpu(uint8_t** const memory) : memory(memory) {
         this->A = 0;
         this->F = 0;
@@ -23,29 +23,17 @@ namespace GB_Cpu {
             this->F &= ((uint8_t) flag ^ 0xFF);
     }
 
-    void Cpu::Cycle() {
+    std::shared_ptr<Operations::Operation> Cpu::Cycle() {
         uint8_t opcode = (*this->memory)[this->PC++];
         uint8_t args_n = Helpers::GetArgsNumber(opcode);
 
         uint8_t args [args_n];
         for (uint8_t i = 0; i < args_n; i++)
-            args[i] = (*this->memory)[this->PC + i + 1];
+            args[i] = (*this->memory)[this->PC++];
 
-        std::unique_ptr<Operations::Operation> operation = this->parser->Parse(opcode, args);
-        operation->Execute();
+        std::shared_ptr<Operations::Operation> operation = this->parser->Parse(opcode, args);
+        if (operation != nullptr)
+            operation->Execute();
+        return operation;
     }
-}
-
-int main() {
-    uint8_t* memory = new uint8_t [4096];
-    memory[0] = 0x07 + 0x08;
-
-    GB_Cpu::Cpu cpu = GB_Cpu::Cpu(&memory);
-    cpu.A = 0x35;
-    cpu.Cycle();
-    printf("%02x\n", cpu.A);
-    printf("%02x\n", cpu.F);
-
-    delete [] memory;
-    return 0;
 }
