@@ -37,6 +37,13 @@ namespace GB_Cpu {
                         return std::make_unique<Operations::RotateByte>(
                             this->cpu, opcode, this->cpu->A, static_cast<Operations::ShiftDirection>((opcode - 7) % 7 % 2), 1);
             }
+        } else if (upper_hb < 0x08 && opcode != 0x76) {
+            return std::make_unique<Operations::LoadByte>(
+                this->cpu, opcode, *this->ChooseOperandByte((opcode - (lower_hb % 8)) >> 3), *this->ChooseOperandByte(lower_hb % 8), 0);
+        } else if (opcode == 0x76) {
+            // HALT: to be implemented
+        } else if (upper_hb < 0x0C) {
+            // bitwise ops
         }
 
         return nullptr;
