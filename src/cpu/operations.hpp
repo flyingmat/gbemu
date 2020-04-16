@@ -26,8 +26,6 @@ namespace GB_Cpu::Operations {
 
     /// Generic operation editing an 8-bit unsigned integer.
     class SingleByteEditOperation : public Operation {
-    private:
-        virtual void SetFlags() = 0;
     public:
         uint8_t& byte;
 
@@ -46,7 +44,7 @@ namespace GB_Cpu::Operations {
     /// Increases an 8-bit unsigned integer and sets related flags.
     class IncreaseByte : public SingleByteEditOperation {
     private:
-        virtual void SetFlags();
+        void SetFlags();
     public:
         IncreaseByte(Cpu* const cpu, const uint8_t opcode, uint8_t& byte);
         virtual bool Step();
@@ -55,7 +53,7 @@ namespace GB_Cpu::Operations {
     /// Decreases an 8-bit unsigned integer and sets related flags.
     class DecreaseByte : public SingleByteEditOperation {
     private:
-        virtual void SetFlags();
+        void SetFlags();
     public:
         DecreaseByte(Cpu* const cpu, const uint8_t opcode, uint8_t& byte);
         virtual bool Step();
@@ -69,12 +67,21 @@ namespace GB_Cpu::Operations {
     /// Rotates a byte in the specified direction, setting related flags.
     class RotateByte : public SingleByteEditOperation {
     private:
-        virtual void SetFlags();
+        void SetFlags();
     public:
         const ShiftDirection direction;
         const bool fast;
 
         RotateByte(Cpu* const cpu, const uint8_t opcode, uint8_t& byte, ShiftDirection direction, bool fast);
+        virtual bool Step();
+    };
+
+    class LoadByte : public SingleByteEditOperation {
+    public:
+        const uint8_t src;
+        const bool immediate;
+
+        LoadByte(Cpu* const cpu, const uint8_t opcode, uint8_t& dst, uint8_t src, bool immediate);
         virtual bool Step();
     };
 

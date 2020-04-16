@@ -29,6 +29,9 @@ namespace GB_Cpu {
                 case 0x05:
                     return std::make_unique<Operations::DecreaseByte>(
                         this->cpu, opcode, *this->ChooseOperandByte((opcode - 5) >> 3));
+                case 0x06:
+                    return std::make_unique<Operations::LoadByte>(
+                        this->cpu, opcode, *this->ChooseOperandByte((opcode - 7) >> 3), args[0], 1);
                 case 0x07:
                     if (upper_hb < 0x01)
                         return std::make_unique<Operations::RotateByte>(

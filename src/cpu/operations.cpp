@@ -108,6 +108,24 @@ namespace GB_Cpu::Operations {
     }
 
     // call base constructor
+    LoadByte::LoadByte(Cpu* const cpu, const uint8_t opcode, uint8_t& dst, uint8_t src, bool immediate)
+        : SingleByteEditOperation(cpu, opcode, dst), src(src), immediate(immediate) {}
+
+    bool LoadByte::Step() {
+        // if immediate is set, one extra read cycle
+        switch (this->step_i++ ^ (uint8_t) !immediate) {
+            case 0:
+                this->byte = this->src;
+                // flags are left unchanged
+                return true;
+            case 1:
+                return false;
+            default:
+                return true;
+        }
+    }
+
+    // call base constructor
     IncreaseDoubleByte::IncreaseDoubleByte(Cpu* const cpu, const uint8_t opcode, uint8_t& upper_byte, uint8_t& lower_byte)
         : DoubleByteEditOperation(cpu, opcode, upper_byte, lower_byte) {};
 
