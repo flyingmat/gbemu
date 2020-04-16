@@ -1,6 +1,6 @@
 #include "gui.hpp"
 
-namespace GBEMU::GUI {
+namespace Gui {
 
     SDL_Window* window = nullptr;
     ImGuiIO* p_io = nullptr;
@@ -47,7 +47,7 @@ namespace GBEMU::GUI {
         ImGui_ImplOpenGL3_Init(glsl_version);
     }
 
-    void ImGuiFrameRender(GBEMU::Cpu* cpu, uint8_t* memory) {
+    void ImGuiFrameRender(Cpu::Cpu* const cpu, uint8_t* const memory, std::shared_ptr<Cpu::Operations::Operation> operation) {
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplSDL2_NewFrame(window);
         ImGui::NewFrame();
@@ -57,19 +57,21 @@ namespace GBEMU::GUI {
 
         std::stringstream hexss;
 
-        std::string AF = std::bitset<16>(cpu->readAF()).to_string();
-        std::string BC = std::bitset<16>(cpu->readBC()).to_string();
-        std::string DE = std::bitset<16>(cpu->readDE()).to_string();
-        std::string HL = std::bitset<16>(cpu->readHL()).to_string();
-        std::string SP = std::bitset<16>(cpu->readSP()).to_string();
-        std::string PC = std::bitset<16>(cpu->readPC()).to_string();
+        std::string AF = std::bitset<16>(Cpu::Helpers::JoinBytes(cpu->A, cpu->F)).to_string();
+        std::string BC = std::bitset<16>(Cpu::Helpers::JoinBytes(cpu->B, cpu->C)).to_string();
+        std::string DE = std::bitset<16>(Cpu::Helpers::JoinBytes(cpu->D, cpu->E)).to_string();
+        std::string HL = std::bitset<16>(Cpu::Helpers::JoinBytes(cpu->H, cpu->L)).to_string();
+        std::string SP = std::bitset<16>(cpu->SP).to_string();
+        std::string PC = std::bitset<16>(cpu->PC).to_string();
 
-        uint8_t opcode = cpu->readOpcode();
+        uint8_t opcode = 0;
+        if (operation != nullptr)
+            opcode = operation->opcode;
         hexss << std::hex << std::setfill('0') << std::setw(2) << std::bitset<8>(opcode).to_ulong();
 
-        uint8_t argn = cpu->getArgN(opcode);
-        for (uint8_t i = 1; i <= argn; i++)
-            hexss << " " <<  std::hex << std::setfill('0') << std::setw(2) << std::bitset<8>(memory[cpu->readPC() + i]).to_ulong();
+        uint8_t argn = Cpu::Helpers::GetArgsNumber(opcode);
+        for (uint8_t i = argn; i > 0; i--)
+            hexss << " " <<  std::hex << std::setfill('0') << std::setw(2) << std::bitset<8>(memory[cpu->PC - i]).to_ulong();
 
         std::string instr = hexss.str();
 
