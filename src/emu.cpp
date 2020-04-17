@@ -23,7 +23,7 @@ int Emu::Play() {
     int error = 0;
 
     bool done = false;
-    std::shared_ptr<Cpu::Operations::Operation> operation = nullptr;
+    std::shared_ptr<Cpu::Operations::Instruction> instruction = nullptr;
     while (!done) {
         SDL_Event event;
         while (SDL_PollEvent(&event)) {
@@ -31,10 +31,10 @@ int Emu::Play() {
             done = Gui::ShouldDestroy(event);
 
             if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_n)
-                operation = this->cpu->Cycle();
+                instruction = this->cpu->Cycle();
         }
 
-        Gui::ImGuiFrameRender(this->cpu.get(), this->memory, operation);
+        Gui::ImGuiFrameRender(this->cpu.get(), this->memory, instruction);
     }
 
     Gui::DestroyInterface();

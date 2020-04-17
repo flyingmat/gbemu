@@ -18,7 +18,7 @@
 namespace Gui {
 
     bool InitInterface();
-    void ImGuiFrameRender(Cpu::Cpu* const cpu, uint8_t* const memory, std::shared_ptr<Cpu::Operations::Operation> operation);
+    void ImGuiFrameRender(Cpu::Cpu* const cpu, uint8_t* const memory, std::shared_ptr<Cpu::Operations::Instruction> instruction);
     bool ShouldDestroy(SDL_Event event);
     void DestroyInterface();
 

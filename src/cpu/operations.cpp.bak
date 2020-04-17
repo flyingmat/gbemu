@@ -1,27 +1,31 @@
+#include <cstdio>
 #include "operations.hpp"
 #include "cpu.hpp"
 
 namespace Cpu::Operations {
-    Instruction::Instruction(std::shared_ptr<Operation> operation, const uint8_t opcode, const uint8_t extra_steps)
-        : operation(operation), opcode(opcode), extra_steps(extra_steps) { this->extra_step_i = 0; }
+    // const member variables are initialized and the step index is set to 0
+    Operation::Operation(Cpu* const cpu, const uint8_t opcode)
+        : cpu(cpu), opcode(opcode) { this->step_i = 0; }
 
-    bool Instruction::Step() {
-        if (this->extra_step_i++ < this->extra_steps)
-            return false;
-        else
-            return this->operation->Step();
+    // all remaining sub-operations are executed
+    void Operation::Execute() {
+        while (!Step()) {}
     }
 
-    void Instruction::Execute() {
-        while (this->extra_step_i++ < this->extra_steps) {}
-        while (!this->operation->Step()) {}
-    }
+    // call base constructor
+    SingleByteEditOperation::SingleByteEditOperation(Cpu* const cpu, const uint8_t opcode, uint8_t& byte)
+        : Operation(cpu, opcode), byte(byte) {}
 
-    Operation::Operation(Cpu* const cpu)
-        : cpu(cpu) { this->step_i = 0; }
+    // call base constructor
+    DoubleByteEditOperation::DoubleByteEditOperation(Cpu* const cpu, const uint8_t opcode, uint8_t& upper_byte, uint8_t& lower_byte)
+        : Operation(cpu, opcode), upper_byte(upper_byte), lower_byte(lower_byte) {}
 
-    IncreaseByte::IncreaseByte(Cpu* const cpu, uint8_t& byte)
-        : Operation(cpu), byte(byte) {}
+    SingleByteArgumentOperation::SingleByteArgumentOperation(Cpu* const cpu, const uint8_t opcode, uint8_t& dst, const uint8_t src, const bool immediate)
+        : Operation(cpu, opcode), dst(dst), src(src) {}
+
+    // call base constructor
+    IncreaseByte::IncreaseByte(Cpu* const cpu, const uint8_t opcode, uint8_t& byte)
+        : SingleByteEditOperation(cpu, opcode, byte) {}
 
     // set the z, n, h flags
     void IncreaseByte::SetFlags() {
@@ -45,8 +49,9 @@ namespace Cpu::Operations {
         }
     }
 
-    DecreaseByte::DecreaseByte(Cpu* const cpu, uint8_t& byte)
-        : Operation(cpu), byte(byte) {}
+    // call base constructor
+    DecreaseByte::DecreaseByte(Cpu* const cpu, const uint8_t opcode, uint8_t& byte)
+        : SingleByteEditOperation(cpu, opcode, byte) {}
 
     // set the z, n, h flags
     void DecreaseByte::SetFlags() {
@@ -70,8 +75,8 @@ namespace Cpu::Operations {
         }
     }
 
-    RotateByte::RotateByte(Cpu* const cpu, uint8_t& byte, const ShiftDirection direction, const bool fast)
-        : Operation(cpu), byte(byte), direction(direction), fast(fast) {}
+    RotateByte::RotateByte(Cpu* const cpu, const uint8_t opcode, uint8_t& byte, ShiftDirection direction, bool fast)
+        : SingleByteEditOperation(cpu, opcode, byte), direction(direction), fast(fast) {}
 
     void RotateByte::SetFlags() {
         // the zero flag is only set if fast is not set
@@ -105,13 +110,39 @@ namespace Cpu::Operations {
         }
     }
 
-    LoadByte::LoadByte(Cpu* const cpu, uint8_t& dst, const uint8_t src)
-        : Operation(cpu), dst(dst), src(src) {}
+    // call base constructor
+    LoadByte::LoadByte(Cpu* const cpu, const uint8_t opcode, uint8_t& dst, const uint8_t src, const bool immediate)
+        : SingleByteArgumentOperation(cpu, opcode, dst, src, immediate) {}
 
     bool LoadByte::Step() {
-        switch (this->step_i++) {
+        // if immediate is set, one extra read cycle
+        switch (this->step_i++ ^ (uint8_t) !immediate) {
             case 0:
-                this->dst = this->src;
+                this->byte = this->src;
+                // flags are left unchanged
+                return true;
+            case 1:
+                return false;
+            default:
+                return true;
+        }
+    }
+
+    // call base constructor
+    IncreaseDoubleByte::IncreaseDoubleByte(Cpu* const cpu, const uint8_t opcode, uint8_t& upper_byte, uint8_t& lower_byte)
+        : DoubleByteEditOperation(cpu, opcode, upper_byte, lower_byte) {};
+
+    bool IncreaseDoubleByte::Step() {
+        switch (this->step_i++) {
+            // increase the lower eight bits, treated as single byte
+            case 0:
+                this->lower_byte++;
+                return false;
+            // if the lower eight bits are equal to zero, carry needed
+            case 1:
+                if (!this->lower_byte)
+                    this->upper_byte++;
+                // no flags are set
                 return true;
             default:
                 return true;

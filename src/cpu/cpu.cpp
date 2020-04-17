@@ -23,7 +23,7 @@ namespace Cpu {
             this->F &= ((uint8_t) flag ^ 0xFF);
     }
 
-    std::shared_ptr<Operations::Operation> Cpu::Cycle() {
+    std::shared_ptr<Operations::Instruction> Cpu::Cycle() {
         uint8_t opcode = (*this->memory)[this->PC++];
         uint8_t args_n = Helpers::GetArgsNumber(opcode);
 
@@ -31,9 +31,9 @@ namespace Cpu {
         for (uint8_t i = 0; i < args_n; i++)
             args[i] = (*this->memory)[this->PC++];
 
-        std::shared_ptr<Operations::Operation> operation = this->parser->Parse(opcode, args);
-        if (operation != nullptr)
-            operation->Execute();
-        return operation;
+        std::shared_ptr<Operations::Instruction> instruction = this->parser->Parse(opcode, args);
+        if (instruction != nullptr)
+            instruction->Execute();
+        return instruction;
     }
 }

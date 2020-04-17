@@ -27,6 +27,6 @@ namespace Cpu {
 
         Cpu(uint8_t** const memory);
         void SetFlag(Flag flag, bool flag_value);
-        std::shared_ptr<Operations::Operation> Cycle();
+        std::shared_ptr<Operations::Instruction> Cycle();
     };
 }

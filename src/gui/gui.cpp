@@ -47,7 +47,7 @@ namespace Gui {
         ImGui_ImplOpenGL3_Init(glsl_version);
     }
 
-    void ImGuiFrameRender(Cpu::Cpu* const cpu, uint8_t* const memory, std::shared_ptr<Cpu::Operations::Operation> operation) {
+    void ImGuiFrameRender(Cpu::Cpu* const cpu, uint8_t* const memory, std::shared_ptr<Cpu::Operations::Instruction> instruction) {
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplSDL2_NewFrame(window);
         ImGui::NewFrame();
@@ -65,8 +65,8 @@ namespace Gui {
         std::string PC = std::bitset<16>(cpu->PC).to_string();
 
         uint8_t opcode = 0;
-        if (operation != nullptr)
-            opcode = operation->opcode;
+        if (instruction != nullptr)
+            opcode = instruction->opcode;
         hexss << std::hex << std::setfill('0') << std::setw(2) << std::bitset<8>(opcode).to_ulong();
 
         uint8_t argn = Cpu::Helpers::GetArgsNumber(opcode);
