@@ -44,10 +44,31 @@ namespace Cpu {
     std::shared_ptr<Operations::Instruction> Parser::Parse(const uint8_t opcode, uint8_t* const args) {
         uint8_t upper_hb = opcode >> 4;
         uint8_t lower_hb = opcode & 0x0F;
-        printf("%02x %01x %01x\n", opcode, upper_hb, lower_hb);
+        printf("%02x\n", opcode);
 
         if (upper_hb < 0x04) {
+            switch (opcode) {
+                // NOP
+                case 0x00:
+                    return nullptr; // to be implemented
+                // LD (u16),SP
+                case 0x08:
+                    return nullptr; // to be implemented
+                // STOP
+                case 0x10:
+                    return nullptr; // to be implemented
+            }
             switch (lower_hb) {
+                // LD rr,u16
+                case 0x01:
+                    return std::make_shared<Operations::Instruction>(
+                        std::make_shared<Operations::LoadDoubleByte>(
+                            this->cpu,
+                            *this->ChooseOperandDoubleByte(2 * upper_hb),
+                            *this->ChooseOperandDoubleByte(2 * upper_hb + 1),
+                            args[0],
+                            args[1]),
+                        opcode, 1);
                 // LD (rr),A
                 case 0x02:
                     return std::make_shared<Operations::Instruction>(

@@ -151,4 +151,20 @@ namespace Cpu::Operations {
                 return true;
         }
     }
+
+    LoadDoubleByte::LoadDoubleByte(Cpu* const cpu, uint8_t& upper_dst, uint8_t& lower_dst, const uint8_t upper_src, const uint8_t lower_src)
+        : Operation(cpu), upper_dst(upper_dst), lower_dst(lower_dst), upper_src(upper_src), lower_src(lower_src) {}
+
+    bool LoadDoubleByte::Step() {
+        switch (step_i++) {
+            case 0:
+                lower_dst = lower_src;
+                return false;
+            case 1:
+                upper_dst = upper_src;
+                return true;
+            default:
+                return true;
+        }
+    }
 }

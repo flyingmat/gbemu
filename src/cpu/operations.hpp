@@ -105,4 +105,15 @@ namespace Cpu::Operations {
         DecreaseDoubleByte(Cpu* const cpu, uint8_t& upper_byte, uint8_t& lower_byte);
         virtual bool Step();
     };
+
+    class LoadDoubleByte : public Operation {
+    public:
+        uint8_t& upper_dst;
+        uint8_t& lower_dst;
+        const uint8_t upper_src;
+        const uint8_t lower_src;
+
+        LoadDoubleByte(Cpu* const cpu, uint8_t& upper_dst, uint8_t& lower_dst, const uint8_t upper_src, const uint8_t lower_src);
+        virtual bool Step();
+    };
 }
