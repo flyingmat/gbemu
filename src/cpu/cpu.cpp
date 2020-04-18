@@ -10,7 +10,8 @@ namespace Cpu {
         this->E = 0;
         this->H = 0;
         this->L = 0;
-        this->SP = 0;
+        this->S = 0;
+        this->P = 0;
         this->PC = 0;
 
         this->parser = std::make_unique<Parser>(this);

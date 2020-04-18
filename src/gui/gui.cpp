@@ -61,7 +61,7 @@ namespace Gui {
         std::string BC = std::bitset<16>(Cpu::Helpers::JoinBytes(cpu->B, cpu->C)).to_string();
         std::string DE = std::bitset<16>(Cpu::Helpers::JoinBytes(cpu->D, cpu->E)).to_string();
         std::string HL = std::bitset<16>(Cpu::Helpers::JoinBytes(cpu->H, cpu->L)).to_string();
-        std::string SP = std::bitset<16>(cpu->SP).to_string();
+        std::string SP = std::bitset<16>(Cpu::Helpers::JoinBytes(cpu->S, cpu->P)).to_string();
         std::string PC = std::bitset<16>(cpu->PC).to_string();
 
         uint8_t opcode = 0;

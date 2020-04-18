@@ -20,7 +20,7 @@ namespace Cpu {
         uint8_t B, C;
         uint8_t D, E;
         uint8_t H, L;
-        uint8_t SP;
+        uint8_t S, P;
         uint8_t PC;
         uint8_t** const memory;
         std::unique_ptr<Parser> parser;

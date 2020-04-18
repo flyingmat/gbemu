@@ -7,6 +7,11 @@ namespace Cpu {
 }
 
 namespace Cpu::Operations {
+    /**
+     * A generic CPU operation. Must be derived to be used.
+     * Each time Step() is called, a sub-operation ("microcode") shall be executed.
+     * After the last sub-operation is executed, CPU flags may be set.
+     */
     class Operation {
     public:
         Cpu* const cpu;
@@ -16,6 +21,11 @@ namespace Cpu::Operations {
         virtual bool Step() = 0;
     };
 
+    /**
+     * CPU instruction. Each time Step() is called, a sub-operation is executed.
+     * When Execute() is called, all remaining sub-operations are executed and
+     * flags are automatically set, accordingly.
+     */
     class Instruction {
     public:
         std::shared_ptr<Operation> operation;
@@ -28,6 +38,7 @@ namespace Cpu::Operations {
         void Execute();
     };
 
+    /// Increases an 8-bit unsigned integer and sets related flags.
     class IncreaseByte : public Operation {
     private:
         void SetFlags();
@@ -38,6 +49,7 @@ namespace Cpu::Operations {
         virtual bool Step();
     };
 
+    /// Decreases an 8-bit unsigned integer and sets related flags.
     class DecreaseByte : public Operation {
     private:
         void SetFlags();
@@ -53,6 +65,7 @@ namespace Cpu::Operations {
         Right
     };
 
+    /// Rotates a byte in the specified direction, setting related flags.
     class RotateByte : public Operation {
     private:
         void SetFlags();
@@ -65,12 +78,31 @@ namespace Cpu::Operations {
         virtual bool Step();
     };
 
+    /// Loads a byte to the specified destination.
     class LoadByte : public Operation {
     public:
         uint8_t& dst;
         const uint8_t src;
 
         LoadByte(Cpu* const cpu, uint8_t& dst, const uint8_t src);
+        virtual bool Step();
+    };
+
+    class IncreaseDoubleByte : public Operation {
+    public:
+        uint8_t& upper_byte;
+        uint8_t& lower_byte;
+
+        IncreaseDoubleByte(Cpu* const cpu, uint8_t& upper_byte, uint8_t& lower_byte);
+        virtual bool Step();
+    };
+
+    class DecreaseDoubleByte : public Operation {
+    public:
+        uint8_t& upper_byte;
+        uint8_t& lower_byte;
+
+        DecreaseDoubleByte(Cpu* const cpu, uint8_t& upper_byte, uint8_t& lower_byte);
         virtual bool Step();
     };
 }

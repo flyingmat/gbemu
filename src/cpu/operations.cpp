@@ -117,4 +117,38 @@ namespace Cpu::Operations {
                 return true;
         }
     }
+
+    IncreaseDoubleByte::IncreaseDoubleByte(Cpu* const cpu, uint8_t& upper_byte, uint8_t& lower_byte)
+        : Operation(cpu), upper_byte(upper_byte), lower_byte(lower_byte) {}
+
+    bool IncreaseDoubleByte::Step() {
+        switch (this->step_i++) {
+            case 0:
+                this->lower_byte++;
+                return false;
+            case 1:
+                if (!this->lower_byte)
+                    this->upper_byte++;
+                return true;
+            default:
+                return true;
+        }
+    }
+
+    DecreaseDoubleByte::DecreaseDoubleByte(Cpu* const cpu, uint8_t& upper_byte, uint8_t& lower_byte)
+        : Operation(cpu), upper_byte(upper_byte), lower_byte(lower_byte) {}
+
+    bool DecreaseDoubleByte::Step() {
+        switch (this->step_i++) {
+            case 0:
+                this->lower_byte--;
+                return false;
+            case 1:
+                if (this->lower_byte == 0xFF)
+                    this->upper_byte--;
+                return true;
+            default:
+                return true;
+        }
+    }
 }
