@@ -124,17 +124,18 @@ namespace Cpu::Operations {
     void AddByte::SetFlags() {
         this->cpu->SetFlag(Flag::z, this->dst == 0x00);
         this->cpu->SetFlag(Flag::n, 0);
-        // only set (half-)carry if an addition actually took place
-        this->cpu->SetFlag(Flag::h, this->dst == 0x10 && this->src != 0x00);
-        this->cpu->SetFlag(Flag::c, this->dst == 0x00 && this->src != 0x00);
     }
 
     bool AddByte::Step() {
         switch (this->step_i++) {
-            case 0:
-                this->dst += this->src;
+            case 0: {
+                uint16_t tmp = this->dst + this->src;
+                this->cpu->SetFlag(Flag::h, (this->dst < 0x10) && (tmp >= 0x10));
+                this->cpu->SetFlag(Flag::c, tmp > 0xFF);
+                this->dst = tmp & 0xFF;
                 this->SetFlags();
                 return true;
+            }
             default:
                 return true;
         }
@@ -146,17 +147,18 @@ namespace Cpu::Operations {
     void AdcByte::SetFlags() {
         this->cpu->SetFlag(Flag::z, this->dst == 0x00);
         this->cpu->SetFlag(Flag::n, 0);
-        // only set (half-)carry if an addition actually took place
-        this->cpu->SetFlag(Flag::h, this->dst == 0x10 && (this->src != 0x00 || this->cpu->GetFlag(Flag::c)));
-        this->cpu->SetFlag(Flag::c, this->dst == 0x00 && (this->src != 0x00 || this->cpu->GetFlag(Flag::c)));
     }
 
     bool AdcByte::Step() {
         switch (this->step_i++) {
-            case 0:
-                this->dst += this->src + this->cpu->GetFlag(Flag::c);
+            case 0: {
+                uint16_t tmp = this->dst + this->src + this->cpu->GetFlag(Flag::c);
+                this->cpu->SetFlag(Flag::h, (this->dst < 0x10) && (tmp >= 0x10));
+                this->cpu->SetFlag(Flag::c, tmp > 0xFF);
+                this->dst = tmp & 0xFF;
                 this->SetFlags();
                 return true;
+            }
             default:
                 return true;
         }
@@ -167,18 +169,19 @@ namespace Cpu::Operations {
 
     void SubByte::SetFlags() {
         this->cpu->SetFlag(Flag::z, this->dst == 0x00);
-        this->cpu->SetFlag(Flag::n, 0);
-        // only set (half-)carry if an addition actually took place
-        this->cpu->SetFlag(Flag::h, this->dst == 0x0F && this->src != 0x00);
-        this->cpu->SetFlag(Flag::c, this->dst == 0xFF && this->src != 0x00);
+        this->cpu->SetFlag(Flag::n, 1);
     }
 
     bool SubByte::Step() {
         switch (this->step_i++) {
-            case 0:
-                this->dst -= this->src;
+            case 0: {
+                int16_t tmp = this->dst - this->src;
+                this->cpu->SetFlag(Flag::h, (this->dst > 0x0F) && (tmp <= 0x0F));
+                this->cpu->SetFlag(Flag::c, tmp < 0);
+                this->dst = static_cast<uint8_t>(tmp);
                 this->SetFlags();
                 return true;
+            }
             default:
                 return true;
         }
@@ -189,18 +192,100 @@ namespace Cpu::Operations {
 
     void SbcByte::SetFlags() {
         this->cpu->SetFlag(Flag::z, this->dst == 0x00);
-        this->cpu->SetFlag(Flag::n, 0);
-        // only set (half-)carry if an addition actually took place
-        this->cpu->SetFlag(Flag::h, this->dst == 0x0F && (this->src != 0x00 || this->cpu->GetFlag(Flag::c)));
-        this->cpu->SetFlag(Flag::c, this->dst == 0xFF && (this->src != 0x00 || this->cpu->GetFlag(Flag::c)));
+        this->cpu->SetFlag(Flag::n, 1);
     }
 
     bool SbcByte::Step() {
         switch (this->step_i++) {
-            case 0:
-                this->dst -= this->src + this->cpu->GetFlag(Flag::c);
+            case 0: {
+                int16_t tmp = this->dst - (this->src + this->cpu->GetFlag(Flag::c));
+                this->cpu->SetFlag(Flag::h, (this->dst > 0x0F) && (tmp <= 0x0F));
+                this->cpu->SetFlag(Flag::c, tmp < 0);
+                this->dst = static_cast<uint8_t>(tmp);
                 this->SetFlags();
                 return true;
+            }
+            default:
+                return true;
+        }
+    }
+
+    AndByte::AndByte(Cpu* const cpu, uint8_t& dst, const uint8_t src)
+        : Operation(cpu), dst(dst), src(src) {}
+
+    void AndByte::SetFlags() {
+        this->cpu->SetFlag(Flag::z, this->dst == 0x00);
+        this->cpu->SetFlag(Flag::n, 0);
+        this->cpu->SetFlag(Flag::h, 1);
+        this->cpu->SetFlag(Flag::c, 0);
+    }
+
+    bool AndByte::Step() {
+        switch (this->step_i++) {
+            case 0:
+                this->dst &= this->src;
+                this->SetFlags();
+                return true;
+            default:
+                return true;
+        }
+    }
+
+    XorByte::XorByte(Cpu* const cpu, uint8_t& dst, const uint8_t src)
+        : Operation(cpu), dst(dst), src(src) {}
+
+    void XorByte::SetFlags() {
+        this->cpu->SetFlag(Flag::z, this->dst == 0x00);
+        this->cpu->SetFlag(Flag::n, 0);
+        this->cpu->SetFlag(Flag::h, 0);
+        this->cpu->SetFlag(Flag::c, 0);
+    }
+
+    bool XorByte::Step() {
+        switch (this->step_i++) {
+            case 0:
+                this->dst ^= this->src;
+                this->SetFlags();
+                return true;
+            default:
+                return true;
+        }
+    }
+
+    OrByte::OrByte(Cpu* const cpu, uint8_t& dst, const uint8_t src)
+        : Operation(cpu), dst(dst), src(src) {}
+
+    void OrByte::SetFlags() {
+        this->cpu->SetFlag(Flag::z, this->dst == 0x00);
+        this->cpu->SetFlag(Flag::n, 0);
+        this->cpu->SetFlag(Flag::h, 0);
+        this->cpu->SetFlag(Flag::c, 0);
+    }
+
+    bool OrByte::Step() {
+        switch (this->step_i++) {
+            case 0:
+                this->dst |= this->src;
+                this->SetFlags();
+                return true;
+            default:
+                return true;
+        }
+    }
+
+    CpByte::CpByte(Cpu* const cpu, const uint8_t dst, const uint8_t src)
+        : Operation(cpu), dst(dst), src(src) {}
+
+    bool CpByte::Step() {
+        switch (this->step_i++) {
+            case 0: {
+                int16_t tmp = this->dst - this->src;
+                this->cpu->SetFlag(Flag::z, tmp == 0x00);
+                this->cpu->SetFlag(Flag::n, 1);
+                this->cpu->SetFlag(Flag::h, (this->dst > 0x0F) && (tmp <= 0x0F));
+                this->cpu->SetFlag(Flag::c, tmp < 0);
+                return true;
+            }
             default:
                 return true;
         }

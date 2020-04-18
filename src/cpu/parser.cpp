@@ -201,6 +201,34 @@ namespace Cpu {
                             this->cpu->A,
                             *this->ChooseOperandByte(lower_hb % 8)),
                     opcode, args, 0);
+                case 0x04:
+                    return std::make_shared<Operations::Instruction>(
+                        std::make_shared<Operations::AndByte>(
+                            this->cpu,
+                            this->cpu->A,
+                            *this->ChooseOperandByte(lower_hb % 8)),
+                    opcode, args, 0);
+                case 0x05:
+                    return std::make_shared<Operations::Instruction>(
+                        std::make_shared<Operations::XorByte>(
+                            this->cpu,
+                            this->cpu->A,
+                            *this->ChooseOperandByte(lower_hb % 8)),
+                    opcode, args, 0);
+                case 0x06:
+                    return std::make_shared<Operations::Instruction>(
+                        std::make_shared<Operations::OrByte>(
+                            this->cpu,
+                            this->cpu->A,
+                            *this->ChooseOperandByte(lower_hb % 8)),
+                    opcode, args, 0);
+                case 0x07:
+                    return std::make_shared<Operations::Instruction>(
+                        std::make_shared<Operations::CpByte>(
+                            this->cpu,
+                            this->cpu->A,
+                            *this->ChooseOperandByte(lower_hb % 8)),
+                    opcode, args, 0);
             }
         }
 
