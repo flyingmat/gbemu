@@ -75,7 +75,7 @@ namespace Cpu::Operations {
 
     void RotateByte::SetFlags() {
         // the zero flag is only set if fast is not set
-        this->cpu->SetFlag(Flag::z, (this->byte == 0) & !this->fast);
+        this->cpu->SetFlag(Flag::z, (this->byte == 0x00) & !this->fast);
         // n and h are always reset
         this->cpu->SetFlag(Flag::n, 0);
         this->cpu->SetFlag(Flag::h, 0);
@@ -112,6 +112,94 @@ namespace Cpu::Operations {
         switch (this->step_i++) {
             case 0:
                 this->dst = this->src;
+                return true;
+            default:
+                return true;
+        }
+    }
+
+    AddByte::AddByte(Cpu* const cpu, uint8_t& dst, const uint8_t src)
+        : Operation(cpu), dst(dst), src(src) {}
+
+    void AddByte::SetFlags() {
+        this->cpu->SetFlag(Flag::z, this->dst == 0x00);
+        this->cpu->SetFlag(Flag::n, 0);
+        // only set (half-)carry if an addition actually took place
+        this->cpu->SetFlag(Flag::h, this->dst == 0x10 && this->src != 0x00);
+        this->cpu->SetFlag(Flag::c, this->dst == 0x00 && this->src != 0x00);
+    }
+
+    bool AddByte::Step() {
+        switch (this->step_i++) {
+            case 0:
+                this->dst += this->src;
+                this->SetFlags();
+                return true;
+            default:
+                return true;
+        }
+    }
+
+    AdcByte::AdcByte(Cpu* const cpu, uint8_t& dst, const uint8_t src)
+        : Operation(cpu), dst(dst), src(src) {}
+
+    void AdcByte::SetFlags() {
+        this->cpu->SetFlag(Flag::z, this->dst == 0x00);
+        this->cpu->SetFlag(Flag::n, 0);
+        // only set (half-)carry if an addition actually took place
+        this->cpu->SetFlag(Flag::h, this->dst == 0x10 && (this->src != 0x00 || this->cpu->GetFlag(Flag::c)));
+        this->cpu->SetFlag(Flag::c, this->dst == 0x00 && (this->src != 0x00 || this->cpu->GetFlag(Flag::c)));
+    }
+
+    bool AdcByte::Step() {
+        switch (this->step_i++) {
+            case 0:
+                this->dst += this->src + this->cpu->GetFlag(Flag::c);
+                this->SetFlags();
+                return true;
+            default:
+                return true;
+        }
+    }
+
+    SubByte::SubByte(Cpu* const cpu, uint8_t& dst, const uint8_t src)
+        : Operation(cpu), dst(dst), src(src) {}
+
+    void SubByte::SetFlags() {
+        this->cpu->SetFlag(Flag::z, this->dst == 0x00);
+        this->cpu->SetFlag(Flag::n, 0);
+        // only set (half-)carry if an addition actually took place
+        this->cpu->SetFlag(Flag::h, this->dst == 0x0F && this->src != 0x00);
+        this->cpu->SetFlag(Flag::c, this->dst == 0xFF && this->src != 0x00);
+    }
+
+    bool SubByte::Step() {
+        switch (this->step_i++) {
+            case 0:
+                this->dst -= this->src;
+                this->SetFlags();
+                return true;
+            default:
+                return true;
+        }
+    }
+
+    SbcByte::SbcByte(Cpu* const cpu, uint8_t& dst, const uint8_t src)
+        : Operation(cpu), dst(dst), src(src) {}
+
+    void SbcByte::SetFlags() {
+        this->cpu->SetFlag(Flag::z, this->dst == 0x00);
+        this->cpu->SetFlag(Flag::n, 0);
+        // only set (half-)carry if an addition actually took place
+        this->cpu->SetFlag(Flag::h, this->dst == 0x0F && (this->src != 0x00 || this->cpu->GetFlag(Flag::c)));
+        this->cpu->SetFlag(Flag::c, this->dst == 0xFF && (this->src != 0x00 || this->cpu->GetFlag(Flag::c)));
+    }
+
+    bool SbcByte::Step() {
+        switch (this->step_i++) {
+            case 0:
+                this->dst -= this->src + this->cpu->GetFlag(Flag::c);
+                this->SetFlags();
                 return true;
             default:
                 return true;

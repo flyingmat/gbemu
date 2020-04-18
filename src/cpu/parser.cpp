@@ -172,7 +172,36 @@ namespace Cpu {
         } else if (opcode == 0x76) {
             // HALT: to be implemented
         } else if (upper_hb < 0x0C) {
-            // bitwise ops
+            switch (((opcode - (lower_hb % 8)) >> 3) % 8) {
+                case 0x00:
+                    return std::make_shared<Operations::Instruction>(
+                        std::make_shared<Operations::AddByte>(
+                            this->cpu,
+                            this->cpu->A,
+                            *this->ChooseOperandByte(lower_hb % 8)),
+                    opcode, args, 0);
+                case 0x01:
+                    return std::make_shared<Operations::Instruction>(
+                        std::make_shared<Operations::AdcByte>(
+                            this->cpu,
+                            this->cpu->A,
+                            *this->ChooseOperandByte(lower_hb % 8)),
+                    opcode, args, 0);
+                case 0x02:
+                    return std::make_shared<Operations::Instruction>(
+                        std::make_shared<Operations::SubByte>(
+                            this->cpu,
+                            this->cpu->A,
+                            *this->ChooseOperandByte(lower_hb % 8)),
+                    opcode, args, 0);
+                case 0x03:
+                    return std::make_shared<Operations::Instruction>(
+                        std::make_shared<Operations::SbcByte>(
+                            this->cpu,
+                            this->cpu->A,
+                            *this->ChooseOperandByte(lower_hb % 8)),
+                    opcode, args, 0);
+            }
         }
 
         return nullptr;

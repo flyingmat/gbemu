@@ -90,6 +90,50 @@ namespace Cpu::Operations {
         virtual bool Step();
     };
 
+    class AddByte : public Operation {
+    private:
+        void SetFlags();
+    public:
+        uint8_t& dst;
+        const uint8_t src;
+
+        AddByte(Cpu* const cpu, uint8_t& dst, const uint8_t src);
+        virtual bool Step();
+    };
+
+    class AdcByte : public Operation {
+    private:
+        void SetFlags();
+    public:
+        uint8_t& dst;
+        const uint8_t src;
+
+        AdcByte(Cpu* const cpu, uint8_t& dst, const uint8_t src);
+        virtual bool Step();
+    };
+
+    class SubByte : public Operation {
+    private:
+        void SetFlags();
+    public:
+        uint8_t& dst;
+        const uint8_t src;
+
+        SubByte(Cpu* const cpu, uint8_t& dst, const uint8_t src);
+        virtual bool Step();
+    };
+
+    class SbcByte : public Operation {
+    private:
+        void SetFlags();
+    public:
+        uint8_t& dst;
+        const uint8_t src;
+
+        SbcByte(Cpu* const cpu, uint8_t& dst, const uint8_t src);
+        virtual bool Step();
+    };
+
     /// Increases the value of an unsigned 16-bit integer treated as two bytes.
     class IncreaseDoubleByte : public Operation {
     public:
