@@ -174,7 +174,7 @@ namespace Cpu::Operations {
     bool JumpRelative::Step() {
         switch (this->step_i++) {
             case 0:
-                this->cpu->PC += this->jump_offset - 127 - 2;
+                this->cpu->PC += this->jump_offset - 128 - 2;
                 return true;
             default:
                 return true;
@@ -193,7 +193,7 @@ namespace Cpu::Operations {
                 } else { return true; }
             case 1:
                 if (this->branch)
-                    this->cpu->PC += this->jump_offset - 127 - 2;
+                    this->cpu->PC += this->jump_offset - 128 - 2;
                 return true;
             default:
                 return true;
