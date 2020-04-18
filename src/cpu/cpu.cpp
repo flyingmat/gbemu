@@ -17,7 +17,11 @@ namespace Cpu {
         this->parser = std::make_unique<Parser>(this);
     }
 
-    void Cpu::SetFlag(Flag flag, bool flag_value) {
+    bool Cpu::GetFlag(const Flag flag) {
+        return (this->F & (uint8_t) flag) != 0;
+    }
+
+    void Cpu::SetFlag(const Flag flag, const bool flag_value) {
         if (flag_value)
             this->F |= (uint8_t) flag;
         else

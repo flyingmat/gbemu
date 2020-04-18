@@ -26,7 +26,8 @@ namespace Cpu {
         std::unique_ptr<Parser> parser;
 
         Cpu(uint8_t** const memory);
-        void SetFlag(Flag flag, bool flag_value);
+        bool GetFlag(const Flag flag);
+        void SetFlag(const Flag flag, const bool flag_value);
         std::shared_ptr<Operations::Instruction> Cycle();
     };
 }

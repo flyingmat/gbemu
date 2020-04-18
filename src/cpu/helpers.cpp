@@ -35,7 +35,9 @@ namespace Cpu::Helpers {
 
     uint8_t GetArgsNumber(uint8_t opcode) {
         if (opcode < 0x40) {
-            if ((opcode & 0x0F) % 8 == 0x06)
+            if ((opcode & 0x0F) == 0x01)
+                return 2;
+            else if ((opcode & 0x0F) % 8 == 0x06)
                 return 1;
             else
                 return 0;

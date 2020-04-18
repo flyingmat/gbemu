@@ -167,4 +167,36 @@ namespace Cpu::Operations {
                 return true;
         }
     }
+
+    JumpRelative::JumpRelative(Cpu* const cpu, const int8_t jump_offset)
+        : Operation(cpu), jump_offset(jump_offset) {}
+
+    bool JumpRelative::Step() {
+        switch (this->step_i++) {
+            case 0:
+                this->cpu->PC += jump_offset - 2;
+                return true;
+            default:
+                return true;
+        }
+    }
+
+    JumpRelativeConditional::JumpRelativeConditional(Cpu* const cpu, const int8_t jump_offset, const Flag flag, const bool flag_value)
+        : Operation(cpu), jump_offset(jump_offset), flag(flag), flag_value(flag_value) { branch = false; }
+
+    bool JumpRelativeConditional::Step() {
+        switch(this->step_i++) {
+            case 0:
+                if (this->cpu->GetFlag(flag) == flag_value) {
+                    this->branch = true;
+                    return false;
+                } else { return true; }
+            case 1:
+                if (this->branch)
+                    this->cpu->PC += jump_offset - 2;
+                return true;
+            default:
+                return true;
+        }
+    }
 }

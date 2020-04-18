@@ -4,6 +4,7 @@
 
 namespace Cpu {
     class Cpu;
+    enum class Flag : uint8_t;
 }
 
 namespace Cpu::Operations {
@@ -88,6 +89,7 @@ namespace Cpu::Operations {
         virtual bool Step();
     };
 
+    /// Increases the value of an unsigned 16-bit integer treated as two bytes.
     class IncreaseDoubleByte : public Operation {
     public:
         uint8_t& upper_byte;
@@ -97,6 +99,7 @@ namespace Cpu::Operations {
         virtual bool Step();
     };
 
+    /// Decreases the value of an unsigned 16-bit integer treated as two bytes.
     class DecreaseDoubleByte : public Operation {
     public:
         uint8_t& upper_byte;
@@ -106,6 +109,7 @@ namespace Cpu::Operations {
         virtual bool Step();
     };
 
+    /// Loads a double-byte to the specified double-byte register.
     class LoadDoubleByte : public Operation {
     public:
         uint8_t& upper_dst;
@@ -114,6 +118,25 @@ namespace Cpu::Operations {
         const uint8_t lower_src;
 
         LoadDoubleByte(Cpu* const cpu, uint8_t& upper_dst, uint8_t& lower_dst, const uint8_t upper_src, const uint8_t lower_src);
+        virtual bool Step();
+    };
+
+    class JumpRelative : public Operation {
+    public:
+        const int8_t jump_offset;
+
+        JumpRelative(Cpu* const cpu, const int8_t jump_offset);
+        virtual bool Step();
+    };
+
+    class JumpRelativeConditional : public Operation {
+    public:
+        const int8_t jump_offset;
+        const Flag flag;
+        const bool flag_value;
+        bool branch;
+
+        JumpRelativeConditional(Cpu* const cpu, const int8_t jump_offset, const Flag flag, const bool flag_value);
         virtual bool Step();
     };
 }

@@ -38,6 +38,14 @@ namespace Cpu {
             case 1: return Helpers::DereferenceDE(this->cpu);
             case 2: return Helpers::DereferenceHL(this->cpu, Helpers::PostOperation::Increase);
             case 3: return Helpers::DereferenceHL(this->cpu, Helpers::PostOperation::Decrease);
+            default: return nullptr;
+        }
+    }
+
+    Flag Parser::ChooseFlag(const uint8_t index) {
+        switch (index) {
+            case 0: return Flag::z;
+            case 1: return Flag::c;
         }
     }
 
@@ -103,6 +111,22 @@ namespace Cpu {
                         opcode, 0);
             }
             switch (lower_hb % 8) {
+                // JR [flag] i8
+                case 0x00:
+                    if (upper_hb < 2)
+                        return std::make_shared<Operations::Instruction>(
+                            std::make_shared<Operations::JumpRelative>(
+                                this->cpu,
+                                args[0]),
+                        opcode, 2);
+                    else
+                        return std::make_shared<Operations::Instruction>(
+                            std::make_shared<Operations::JumpRelativeConditional>(
+                                this->cpu,
+                                args[0],
+                                this->ChooseFlag(upper_hb - 2),
+                                lower_hb == 0x08),
+                        opcode, 1);
                 // INC r
                 case 0x04:
                     return std::make_shared<Operations::Instruction>(
