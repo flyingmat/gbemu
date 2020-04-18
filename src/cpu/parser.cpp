@@ -49,10 +49,10 @@ namespace Cpu {
         }
     }
 
-    std::shared_ptr<Operations::Instruction> Parser::Parse(const uint8_t opcode, uint8_t* const args) {
+    std::shared_ptr<Operations::Instruction> Parser::Parse(const uint8_t opcode, std::shared_ptr<uint8_t[]> args) {
         uint8_t upper_hb = opcode >> 4;
         uint8_t lower_hb = opcode & 0x0F;
-        printf("%02x\n", opcode);
+        printf("%02x %02x %02x\n", opcode, args[0], args[1]);
 
         if (upper_hb < 0x04) {
             switch (opcode) {
@@ -76,7 +76,7 @@ namespace Cpu {
                             *this->ChooseOperandDoubleByte(2 * upper_hb + 1),
                             args[0],
                             args[1]),
-                        opcode, 1);
+                        opcode, args, 1);
                 // LD (rr),A
                 case 0x02:
                     return std::make_shared<Operations::Instruction>(
@@ -84,7 +84,7 @@ namespace Cpu {
                             this->cpu,
                             *this->ChooseDereference(upper_hb),
                             this->cpu->A),
-                        opcode, 1);
+                        opcode, args, 1);
                 // LD A,(rr)
                 case 0x0A:
                     return std::make_shared<Operations::Instruction>(
@@ -92,7 +92,7 @@ namespace Cpu {
                             this->cpu,
                             this->cpu->A,
                             *this->ChooseDereference(upper_hb)),
-                        opcode, 1);
+                        opcode, args, 1);
                 // INC rr
                 case 0x03:
                     return std::make_shared<Operations::Instruction>(
@@ -100,7 +100,7 @@ namespace Cpu {
                             this->cpu,
                             *this->ChooseOperandDoubleByte(2 * upper_hb),
                             *this->ChooseOperandDoubleByte(2 * upper_hb + 1)),
-                        opcode, 0);
+                        opcode, args, 0);
                 // DEC rr
                 case 0x0B:
                     return std::make_shared<Operations::Instruction>(
@@ -108,39 +108,40 @@ namespace Cpu {
                             this->cpu,
                             *this->ChooseOperandDoubleByte(2 * upper_hb),
                             *this->ChooseOperandDoubleByte(2 * upper_hb + 1)),
-                        opcode, 0);
+                        opcode, args, 0);
             }
             switch (lower_hb % 8) {
-                // JR [flag] i8
                 case 0x00:
+                    // JR i8
                     if (upper_hb < 2)
                         return std::make_shared<Operations::Instruction>(
                             std::make_shared<Operations::JumpRelative>(
                                 this->cpu,
-                                args[0]),
-                        opcode, 2);
+                                static_cast<int8_t>(args[0])),
+                        opcode, args, 2);
+                    // JR [cnd] i8
                     else
                         return std::make_shared<Operations::Instruction>(
                             std::make_shared<Operations::JumpRelativeConditional>(
                                 this->cpu,
-                                args[0],
+                                static_cast<int8_t>(args[0]),
                                 this->ChooseFlag(upper_hb - 2),
                                 lower_hb == 0x08),
-                        opcode, 1);
+                        opcode, args, 1);
                 // INC r
                 case 0x04:
                     return std::make_shared<Operations::Instruction>(
                         std::make_shared<Operations::IncreaseByte>(
                             this->cpu,
                             *this->ChooseOperandByte((opcode - 4) >> 3)),
-                        opcode, 2 * (opcode == 0x34));
+                        opcode, args, 2 * (opcode == 0x34));
                 // DEC r
                 case 0x05:
                     return std::make_shared<Operations::Instruction>(
                         std::make_shared<Operations::DecreaseByte>(
                             this->cpu,
                             *this->ChooseOperandByte((opcode - 5) >> 3)),
-                        opcode, 2 * (opcode == 0x35));
+                        opcode, args, 2 * (opcode == 0x35));
                 // LD r,u8
                 case 0x06:
                     return std::make_shared<Operations::Instruction>(
@@ -148,7 +149,7 @@ namespace Cpu {
                             this->cpu,
                             *this->ChooseOperandByte((opcode - 6) >> 3),
                             args[0]),
-                        opcode, opcode == 0x36);
+                        opcode, args, opcode == 0x36);
                 case 0x07:
                     // RLCA / RRCA
                     if (upper_hb < 0x01)
@@ -158,7 +159,7 @@ namespace Cpu {
                                 this->cpu->A,
                                 static_cast<Operations::ShiftDirection>(lower_hb == 0x07),
                                 1),
-                            opcode, 0);
+                            opcode, args, 0);
             }
         } else if (upper_hb < 0x08 && opcode != 0x76) {
             // LD r,r
@@ -167,7 +168,7 @@ namespace Cpu {
                     this->cpu,
                     *this->ChooseOperandByte(((opcode - (lower_hb % 8)) >> 3) % 8),
                     *this->ChooseOperandByte(lower_hb % 8)),
-                opcode, ((lower_hb % 8) == 6) || (upper_hb == 0x07 && lower_hb < 0x08));
+                opcode, args, ((lower_hb % 8) == 6) || (upper_hb == 0x07 && lower_hb < 0x08));
         } else if (opcode == 0x76) {
             // HALT: to be implemented
         } else if (upper_hb < 0x0C) {

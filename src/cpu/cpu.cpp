@@ -32,7 +32,7 @@ namespace Cpu {
         uint8_t opcode = (*this->memory)[this->PC++];
         uint8_t args_n = Helpers::GetArgsNumber(opcode);
 
-        uint8_t args [args_n];
+        std::shared_ptr<uint8_t[]> args(new uint8_t[args_n]);
         for (uint8_t i = 0; i < args_n; i++)
             args[i] = (*this->memory)[this->PC++];
 

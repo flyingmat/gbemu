@@ -70,8 +70,8 @@ namespace Gui {
         hexss << std::hex << std::setfill('0') << std::setw(2) << std::bitset<8>(opcode).to_ulong();
 
         uint8_t argn = Cpu::Helpers::GetArgsNumber(opcode);
-        for (uint8_t i = argn; i > 0; i--)
-            hexss << " " <<  std::hex << std::setfill('0') << std::setw(2) << std::bitset<8>(memory[cpu->PC - i]).to_ulong();
+        for (uint8_t i = 0; i < argn; i++)
+            hexss << " " <<  std::hex << std::setfill('0') << std::setw(2) << std::bitset<8>(instruction->args[i]).to_ulong();
 
         std::string instr = hexss.str();
 

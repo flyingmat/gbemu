@@ -16,6 +16,6 @@ namespace Cpu {
         uint8_t* ChooseOperandDoubleByte(const uint8_t index);
         uint8_t* ChooseDereference(const uint8_t index);
         Flag ChooseFlag(const uint8_t index);
-        std::shared_ptr<Operations::Instruction> Parse(const uint8_t opcode, uint8_t* const args);
+        std::shared_ptr<Operations::Instruction> Parse(const uint8_t opcode, std::shared_ptr<uint8_t[]> args);
     };
 }

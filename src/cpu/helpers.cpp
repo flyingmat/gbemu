@@ -39,6 +39,8 @@ namespace Cpu::Helpers {
                 return 2;
             else if ((opcode & 0x0F) % 8 == 0x06)
                 return 1;
+            else if ((opcode & 0x0F) % 8 == 0x00 && (opcode >> 4) > 0)
+                return 1;
             else
                 return 0;
         } else if (opcode < 0x80) {

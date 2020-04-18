@@ -31,10 +31,11 @@ namespace Cpu::Operations {
     public:
         std::shared_ptr<Operation> operation;
         const uint8_t opcode;
+        std::shared_ptr<uint8_t[]> args;
         const uint8_t extra_steps;
         uint8_t extra_step_i;
 
-        Instruction(std::shared_ptr<Operation> operation, const uint8_t opcode, const uint8_t extra_steps);
+        Instruction(std::shared_ptr<Operation> operation, const uint8_t opcode, std::shared_ptr<uint8_t[]> args, const uint8_t extra_steps);
         bool Step();
         void Execute();
     };
