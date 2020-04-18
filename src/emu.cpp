@@ -6,8 +6,8 @@ Emu::Emu() {
     this->cpu = std::make_unique<Cpu::Cpu>(&this->memory);
 
     // testing
-    for (size_t i = 0; i < 0xFF; i++)
-        this->memory[i] = i;
+    memory[0] = 0x18;
+    memory[1] = 0xFF;
 }
 
 Emu::~Emu() {

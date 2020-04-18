@@ -124,20 +124,20 @@ namespace Cpu::Operations {
 
     class JumpRelative : public Operation {
     public:
-        const int8_t jump_offset;
+        const uint8_t jump_offset;
 
-        JumpRelative(Cpu* const cpu, const int8_t jump_offset);
+        JumpRelative(Cpu* const cpu, const uint8_t jump_offset);
         virtual bool Step();
     };
 
     class JumpRelativeConditional : public Operation {
     public:
-        const int8_t jump_offset;
+        const uint8_t jump_offset;
         const Flag flag;
         const bool flag_value;
         bool branch;
 
-        JumpRelativeConditional(Cpu* const cpu, const int8_t jump_offset, const Flag flag, const bool flag_value);
+        JumpRelativeConditional(Cpu* const cpu, const uint8_t jump_offset, const Flag flag, const bool flag_value);
         virtual bool Step();
     };
 }

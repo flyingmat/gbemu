@@ -113,18 +113,18 @@ namespace Cpu {
             switch (lower_hb % 8) {
                 case 0x00:
                     // JR i8
-                    if (upper_hb < 2)
+                    if (upper_hb < 0x02)
                         return std::make_shared<Operations::Instruction>(
                             std::make_shared<Operations::JumpRelative>(
                                 this->cpu,
-                                static_cast<int8_t>(args[0])),
+                                args[0]),
                         opcode, args, 2);
                     // JR [cnd] i8
                     else
                         return std::make_shared<Operations::Instruction>(
                             std::make_shared<Operations::JumpRelativeConditional>(
                                 this->cpu,
-                                static_cast<int8_t>(args[0]),
+                                args[0],
                                 this->ChooseFlag(upper_hb - 2),
                                 lower_hb == 0x08),
                         opcode, args, 1);

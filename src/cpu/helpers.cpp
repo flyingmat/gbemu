@@ -6,7 +6,7 @@ namespace Cpu::Helpers {
         return (uint16_t) ((upper_byte << 8) | lower_byte);
     }
 
-    uint8_t* DereferenceDoubleByte(Cpu* const cpu, uint8_t& upper_byte, uint8_t& lower_byte, PostOperation post_op) {
+    uint8_t* DereferenceDoubleByte(Cpu* const cpu, uint8_t& upper_byte, uint8_t& lower_byte, const PostOperation post_op) {
         uint8_t* memory_address = *cpu->memory + JoinBytes(upper_byte, lower_byte);
         switch (post_op) {
             case PostOperation::Increase:
@@ -29,7 +29,7 @@ namespace Cpu::Helpers {
         return DereferenceDoubleByte(cpu, cpu->D, cpu->E, PostOperation::None);
     }
 
-    uint8_t* DereferenceHL(Cpu* const cpu, PostOperation post_op) {
+    uint8_t* DereferenceHL(Cpu* const cpu, const PostOperation post_op) {
         return DereferenceDoubleByte(cpu, cpu->H, cpu->L, post_op);
     }
 
