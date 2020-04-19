@@ -56,6 +56,20 @@ namespace Cpu {
         }
     }
 
+    uint8_t* Parser::ChooseStackDoubleByte(const uint8_t index) {
+        switch (index) {
+            case 0: return &this->cpu->B;
+            case 1: return &this->cpu->C;
+            case 2: return &this->cpu->D;
+            case 3: return &this->cpu->E;
+            case 4: return &this->cpu->H;
+            case 5: return &this->cpu->L;
+            case 6: return &this->cpu->A;
+            case 7: return &this->cpu->F;
+            default: return nullptr;
+        }
+    }
+
     Flag Parser::ChooseFlag(const uint8_t index) {
         switch (index) {
             case 0: return Flag::z;
@@ -190,6 +204,24 @@ namespace Cpu {
                 this->ChooseAluOperation(((opcode - (lower_hb % 8)) >> 3) % 8, *this->ChooseOperandByte(lower_hb % 8)),
                 opcode, args, lower_hb == 0x06);
         } else {
+            switch (lower_hb) {
+                // POP rr
+                case 0x01:
+                    return std::make_shared<Operations::Instruction>(
+                        std::make_shared<Operations::PopDoubleByte>(
+                            this->cpu,
+                            *this->ChooseStackDoubleByte(2 * (upper_hb - 0xC)),
+                            *this->ChooseStackDoubleByte(2 * (upper_hb - 0xC) + 1)),
+                        opcode, args, 1);
+                // PUSh rr
+                case 0x05:
+                    return std::make_shared<Operations::Instruction>(
+                        std::make_shared<Operations::PushDoubleByte>(
+                            this->cpu,
+                            *this->ChooseStackDoubleByte(2 * (upper_hb - 0xC)),
+                            *this->ChooseStackDoubleByte(2 * (upper_hb - 0xC) + 1)),
+                        opcode, args, 2);
+            }
             switch (lower_hb % 8) {
                 case 6:
                     return std::make_shared<Operations::Instruction>(

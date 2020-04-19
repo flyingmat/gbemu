@@ -208,6 +208,24 @@ namespace Cpu::Operations {
         virtual bool Step();
     };
 
+    class PopDoubleByte : public Operation {
+    public:
+        uint8_t& upper_dst;
+        uint8_t& lower_dst;
+
+        PopDoubleByte(Cpu* const cpu, uint8_t& upper_dst, uint8_t& lower_dst);
+        virtual bool Step();
+    };
+
+    class PushDoubleByte : public Operation {
+    public:
+        const uint8_t upper_src;
+        const uint8_t lower_src;
+
+        PushDoubleByte(Cpu* const cpu, const uint8_t upper_src, const uint8_t lower_src);
+        virtual bool Step();
+    };
+
     class JumpRelative : public Operation {
     public:
         const uint8_t jump_offset;

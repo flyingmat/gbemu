@@ -21,6 +21,7 @@ namespace Cpu::Helpers {
     uint8_t* DereferenceDE(Cpu* const cpu);
     /// Returns a pointer to the byte stored in memory at address HL.
     uint8_t* DereferenceHL(Cpu* const cpu, const PostOperation post_op);
+    uint8_t* DereferenceSP(Cpu* const cpu, const PostOperation post_op);
 
     uint8_t GetArgsNumber(uint8_t opcode);
 }

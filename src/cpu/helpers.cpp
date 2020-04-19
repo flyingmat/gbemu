@@ -33,6 +33,10 @@ namespace Cpu::Helpers {
         return DereferenceDoubleByte(cpu, cpu->H, cpu->L, post_op);
     }
 
+    uint8_t* DereferenceSP(Cpu* const cpu, const PostOperation post_op) {
+        return DereferenceDoubleByte(cpu, cpu->S, cpu->P, post_op);
+    }
+
     uint8_t GetArgsNumber(uint8_t opcode) {
         if (opcode < 0x40) {
             if ((opcode & 0x0F) == 0x01)

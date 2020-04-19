@@ -341,6 +341,41 @@ namespace Cpu::Operations {
         }
     }
 
+    PopDoubleByte::PopDoubleByte(Cpu* const cpu, uint8_t& upper_dst, uint8_t& lower_dst)
+        : Operation(cpu), upper_dst(upper_dst), lower_dst(lower_dst) {}
+
+    bool PopDoubleByte::Step() {
+        switch (this->step_i++) {
+            case 0:
+                lower_dst = *Helpers::DereferenceSP(this->cpu, Helpers::PostOperation::Increase);
+                return false;
+            case 1:
+                upper_dst = *Helpers::DereferenceSP(this->cpu, Helpers::PostOperation::Increase);
+                return true;
+            default:
+                return true;
+        }
+    }
+
+    PushDoubleByte::PushDoubleByte(Cpu* const cpu, const uint8_t upper_src, const uint8_t lower_src)
+        : Operation(cpu), upper_src(upper_src), lower_src(lower_src) {}
+
+    bool PushDoubleByte::Step() {
+        switch (this->step_i++) {
+            // lol ugly code
+            case 0:
+                Helpers::DereferenceSP(this->cpu, Helpers::PostOperation::Decrease);
+                *Helpers::DereferenceSP(this->cpu, Helpers::PostOperation::None) = this->upper_src;
+                return false;
+            case 1:
+                Helpers::DereferenceSP(this->cpu, Helpers::PostOperation::Decrease);
+                *Helpers::DereferenceSP(this->cpu, Helpers::PostOperation::None) = this->lower_src;
+                return true;
+            default:
+                return true;
+        }
+    }
+
     JumpRelative::JumpRelative(Cpu* const cpu, const uint8_t jump_offset)
         : Operation(cpu), jump_offset(jump_offset) {}
 
