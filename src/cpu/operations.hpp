@@ -208,6 +208,27 @@ namespace Cpu::Operations {
         virtual bool Step();
     };
 
+    class StoreDoubleByte : public Operation {
+    public:
+        const uint16_t memory_address;
+        const uint8_t upper_src;
+        const uint8_t lower_src;
+
+        StoreDoubleByte(Cpu* const cpu, const uint16_t memory_address, const uint8_t upper_src, const uint8_t lower_src);
+        virtual bool Step();
+    };
+
+    class AddDoubleByte : public Operation {
+    public:
+        uint8_t& upper_dst;
+        uint8_t& lower_dst;
+        const uint8_t upper_src;
+        const uint8_t lower_src;
+
+        AddDoubleByte(Cpu* const cpu, uint8_t& upper_dst, uint8_t& lower_dst, const uint8_t upper_src, const uint8_t lower_src);
+        virtual bool Step();
+    };
+
     class PopDoubleByte : public Operation {
     public:
         uint8_t& upper_dst;

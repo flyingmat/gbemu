@@ -89,7 +89,13 @@ namespace Cpu {
                     return nullptr; // to be implemented
                 // LD (u16),SP
                 case 0x08:
-                    return nullptr; // to be implemented
+                    return std::make_shared<Operations::Instruction>(
+                        std::make_shared<Operations::StoreDoubleByte>(
+                            this->cpu,
+                            Helpers::JoinBytes(args[0], args[1]),
+                            this->cpu->S,
+                            this->cpu->P),
+                        opcode, args, 3);
                 // STOP
                 case 0x10:
                     return nullptr; // to be implemented
@@ -126,6 +132,16 @@ namespace Cpu {
                     return std::make_shared<Operations::Instruction>(
                         std::make_shared<Operations::IncreaseDoubleByte>(
                             this->cpu,
+                            *this->ChooseOperandDoubleByte(2 * upper_hb),
+                            *this->ChooseOperandDoubleByte(2 * upper_hb + 1)),
+                        opcode, args, 0);
+                // ADD rr,rr
+                case 0x09:
+                    return std::make_shared<Operations::Instruction>(
+                        std::make_shared<Operations::AddDoubleByte>(
+                            this->cpu,
+                            this->cpu->H,
+                            this->cpu->L,
                             *this->ChooseOperandDoubleByte(2 * upper_hb),
                             *this->ChooseOperandDoubleByte(2 * upper_hb + 1)),
                         opcode, args, 0);

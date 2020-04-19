@@ -329,13 +329,52 @@ namespace Cpu::Operations {
         : Operation(cpu), upper_dst(upper_dst), lower_dst(lower_dst), upper_src(upper_src), lower_src(lower_src) {}
 
     bool LoadDoubleByte::Step() {
-        switch (step_i++) {
+        switch (this->step_i++) {
             case 0:
                 lower_dst = lower_src;
                 return false;
             case 1:
                 upper_dst = upper_src;
                 return true;
+            default:
+                return true;
+        }
+    }
+
+    StoreDoubleByte::StoreDoubleByte(Cpu* const cpu, const uint16_t memory_address, const uint8_t upper_src, const uint8_t lower_src)
+        : Operation(cpu), memory_address(memory_address), upper_src(upper_src), lower_src(lower_src) {}
+
+    bool StoreDoubleByte::Step() {
+        switch (this->step_i++) {
+            case 0:
+                (*this->cpu->memory)[this->memory_address] = upper_src;
+                return false;
+            case 1:
+                (*this->cpu->memory)[this->memory_address + 1] = lower_src;
+                return true;
+            default:
+                return true;
+        }
+    }
+
+    AddDoubleByte::AddDoubleByte(Cpu* const cpu, uint8_t& upper_dst, uint8_t& lower_dst, const uint8_t upper_src, const uint8_t lower_src)
+        : Operation(cpu), upper_dst(upper_dst), lower_dst(lower_dst), upper_src(upper_src), lower_src(lower_src) {}
+
+    bool AddDoubleByte::Step() {
+        switch (this->step_i++) {
+            case 0: {
+                uint16_t tmp = this->lower_dst + this->lower_src;
+                this->cpu->SetFlag(Flag::h, tmp > 0xFF);
+                this->lower_dst = tmp & 0xFF;
+                return false;
+            }
+            case 1: {
+                uint16_t tmp = this->upper_dst + this->upper_src + this->cpu->GetFlag(Flag::h);
+                this->cpu->SetFlag(Flag::c, tmp > 0xFF);
+                this->upper_dst = tmp & 0xFF;
+                this->cpu->SetFlag(Flag::n, 0);
+                return true;
+            }
             default:
                 return true;
         }
