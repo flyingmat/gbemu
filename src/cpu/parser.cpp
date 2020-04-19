@@ -42,6 +42,20 @@ namespace Cpu {
         }
     }
 
+    std::shared_ptr<Operations::Operation> Parser::ChooseAluOperation(const uint8_t index, const uint8_t operand) {
+        switch (index) {
+            case 0: return std::make_shared<Operations::AddByte>(this->cpu, this->cpu->A, operand);
+            case 1: return std::make_shared<Operations::AdcByte>(this->cpu, this->cpu->A, operand);
+            case 2: return std::make_shared<Operations::SubByte>(this->cpu, this->cpu->A, operand);
+            case 3: return std::make_shared<Operations::SbcByte>(this->cpu, this->cpu->A, operand);
+            case 4: return std::make_shared<Operations::AndByte>(this->cpu, this->cpu->A, operand);
+            case 5: return std::make_shared<Operations::XorByte>(this->cpu, this->cpu->A, operand);
+            case 6: return std::make_shared<Operations::OrByte>(this->cpu, this->cpu->A, operand);
+            case 7: return std::make_shared<Operations::CpByte>(this->cpu, this->cpu->A, operand);
+            default: return nullptr;
+        }
+    }
+
     Flag Parser::ChooseFlag(const uint8_t index) {
         switch (index) {
             case 0: return Flag::z;
@@ -172,63 +186,15 @@ namespace Cpu {
         } else if (opcode == 0x76) {
             // HALT: to be implemented
         } else if (upper_hb < 0x0C) {
-            switch (((opcode - (lower_hb % 8)) >> 3) % 8) {
-                case 0x00:
+            return std::make_shared<Operations::Instruction>(
+                this->ChooseAluOperation(((opcode - (lower_hb % 8)) >> 3) % 8, *this->ChooseOperandByte(lower_hb % 8)),
+                opcode, args, lower_hb == 0x06);
+        } else {
+            switch (lower_hb % 8) {
+                case 6:
                     return std::make_shared<Operations::Instruction>(
-                        std::make_shared<Operations::AddByte>(
-                            this->cpu,
-                            this->cpu->A,
-                            *this->ChooseOperandByte(lower_hb % 8)),
-                    opcode, args, 0);
-                case 0x01:
-                    return std::make_shared<Operations::Instruction>(
-                        std::make_shared<Operations::AdcByte>(
-                            this->cpu,
-                            this->cpu->A,
-                            *this->ChooseOperandByte(lower_hb % 8)),
-                    opcode, args, 0);
-                case 0x02:
-                    return std::make_shared<Operations::Instruction>(
-                        std::make_shared<Operations::SubByte>(
-                            this->cpu,
-                            this->cpu->A,
-                            *this->ChooseOperandByte(lower_hb % 8)),
-                    opcode, args, 0);
-                case 0x03:
-                    return std::make_shared<Operations::Instruction>(
-                        std::make_shared<Operations::SbcByte>(
-                            this->cpu,
-                            this->cpu->A,
-                            *this->ChooseOperandByte(lower_hb % 8)),
-                    opcode, args, 0);
-                case 0x04:
-                    return std::make_shared<Operations::Instruction>(
-                        std::make_shared<Operations::AndByte>(
-                            this->cpu,
-                            this->cpu->A,
-                            *this->ChooseOperandByte(lower_hb % 8)),
-                    opcode, args, 0);
-                case 0x05:
-                    return std::make_shared<Operations::Instruction>(
-                        std::make_shared<Operations::XorByte>(
-                            this->cpu,
-                            this->cpu->A,
-                            *this->ChooseOperandByte(lower_hb % 8)),
-                    opcode, args, 0);
-                case 0x06:
-                    return std::make_shared<Operations::Instruction>(
-                        std::make_shared<Operations::OrByte>(
-                            this->cpu,
-                            this->cpu->A,
-                            *this->ChooseOperandByte(lower_hb % 8)),
-                    opcode, args, 0);
-                case 0x07:
-                    return std::make_shared<Operations::Instruction>(
-                        std::make_shared<Operations::CpByte>(
-                            this->cpu,
-                            this->cpu->A,
-                            *this->ChooseOperandByte(lower_hb % 8)),
-                    opcode, args, 0);
+                        this->ChooseAluOperation((opcode - 198) >> 3, args[0]),
+                        opcode, args, 1);
             }
         }
 
