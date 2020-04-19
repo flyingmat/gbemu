@@ -347,10 +347,10 @@ namespace Cpu::Operations {
     bool PopDoubleByte::Step() {
         switch (this->step_i++) {
             case 0:
-                lower_dst = *Helpers::DereferenceSP(this->cpu, Helpers::PostOperation::Increase);
+                lower_dst = *Helpers::DereferenceSP(this->cpu, Helpers::DoubleByteOperation::Increase);
                 return false;
             case 1:
-                upper_dst = *Helpers::DereferenceSP(this->cpu, Helpers::PostOperation::Increase);
+                upper_dst = *Helpers::DereferenceSP(this->cpu, Helpers::DoubleByteOperation::Increase);
                 return true;
             default:
                 return true;
@@ -364,12 +364,10 @@ namespace Cpu::Operations {
         switch (this->step_i++) {
             // lol ugly code
             case 0:
-                Helpers::DereferenceSP(this->cpu, Helpers::PostOperation::Decrease);
-                *Helpers::DereferenceSP(this->cpu, Helpers::PostOperation::None) = this->upper_src;
+                *Helpers::DereferenceSP(this->cpu, Helpers::DoubleByteOperation::Decrease) = this->upper_src;
                 return false;
             case 1:
-                Helpers::DereferenceSP(this->cpu, Helpers::PostOperation::Decrease);
-                *Helpers::DereferenceSP(this->cpu, Helpers::PostOperation::None) = this->lower_src;
+                *Helpers::DereferenceSP(this->cpu, Helpers::DoubleByteOperation::Decrease) = this->lower_src;
                 return true;
             default:
                 return true;

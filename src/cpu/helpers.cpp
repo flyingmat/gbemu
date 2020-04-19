@@ -6,35 +6,48 @@ namespace Cpu::Helpers {
         return (uint16_t) ((upper_byte << 8) | lower_byte);
     }
 
-    uint8_t* DereferenceDoubleByte(Cpu* const cpu, uint8_t& upper_byte, uint8_t& lower_byte, const PostOperation post_op) {
-        uint8_t* memory_address = *cpu->memory + JoinBytes(upper_byte, lower_byte);
-        switch (post_op) {
-            case PostOperation::Increase:
+    void ExecuteDoubleByteOperation(Cpu* const cpu, uint8_t& upper_byte, uint8_t& lower_byte, const DoubleByteOperation op) {
+        switch (op) {
+            case DoubleByteOperation::Increase:
                 if (!++lower_byte)
                     upper_byte++;
                 break;
-            case PostOperation::Decrease:
+            case DoubleByteOperation::Decrease:
                 if (--lower_byte == 0xFF)
                     upper_byte--;
                 break;
+            default:
+                break;
         }
+    }
+
+    uint8_t* DereferenceDoubleByte(Cpu* const cpu, uint8_t& upper_byte, uint8_t& lower_byte, const DoubleByteOperation post_op) {
+        uint8_t* memory_address = *cpu->memory + JoinBytes(upper_byte, lower_byte);
+        ExecuteDoubleByteOperation(cpu, upper_byte, lower_byte, post_op);
         return memory_address;
     }
 
     uint8_t* DereferenceBC(Cpu* const cpu) {
-        return DereferenceDoubleByte(cpu, cpu->B, cpu->C, PostOperation::None);
+        return DereferenceDoubleByte(cpu, cpu->B, cpu->C, DoubleByteOperation::None);
     }
 
     uint8_t* DereferenceDE(Cpu* const cpu) {
-        return DereferenceDoubleByte(cpu, cpu->D, cpu->E, PostOperation::None);
+        return DereferenceDoubleByte(cpu, cpu->D, cpu->E, DoubleByteOperation::None);
     }
 
-    uint8_t* DereferenceHL(Cpu* const cpu, const PostOperation post_op) {
+    uint8_t* DereferenceHL(Cpu* const cpu, const DoubleByteOperation post_op) {
         return DereferenceDoubleByte(cpu, cpu->H, cpu->L, post_op);
     }
 
-    uint8_t* DereferenceSP(Cpu* const cpu, const PostOperation post_op) {
-        return DereferenceDoubleByte(cpu, cpu->S, cpu->P, post_op);
+    uint8_t* DereferenceSP(Cpu* const cpu, const DoubleByteOperation sp_op) {
+        switch (sp_op) {
+            case DoubleByteOperation::Increase:
+            case DoubleByteOperation::None:
+                return DereferenceDoubleByte(cpu, cpu->S, cpu->P, sp_op);
+            case DoubleByteOperation::Decrease:
+                ExecuteDoubleByteOperation(cpu, cpu->S, cpu->P, DoubleByteOperation::Decrease);
+                return DereferenceDoubleByte(cpu, cpu->S, cpu->P, DoubleByteOperation::None);
+        }
     }
 
     uint8_t GetArgsNumber(uint8_t opcode) {

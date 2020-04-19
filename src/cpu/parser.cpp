@@ -12,7 +12,7 @@ namespace Cpu {
             case 3: return &this->cpu->E;
             case 4: return &this->cpu->H;
             case 5: return &this->cpu->L;
-            case 6: return Helpers::DereferenceHL(this->cpu, Helpers::PostOperation::None);
+            case 6: return Helpers::DereferenceHL(this->cpu, Helpers::DoubleByteOperation::None);
             case 7: return &this->cpu->A;
             default: return nullptr;
         }
@@ -36,8 +36,8 @@ namespace Cpu {
         switch (index) {
             case 0: return Helpers::DereferenceBC(this->cpu);
             case 1: return Helpers::DereferenceDE(this->cpu);
-            case 2: return Helpers::DereferenceHL(this->cpu, Helpers::PostOperation::Increase);
-            case 3: return Helpers::DereferenceHL(this->cpu, Helpers::PostOperation::Decrease);
+            case 2: return Helpers::DereferenceHL(this->cpu, Helpers::DoubleByteOperation::Increase);
+            case 3: return Helpers::DereferenceHL(this->cpu, Helpers::DoubleByteOperation::Decrease);
             default: return nullptr;
         }
     }
