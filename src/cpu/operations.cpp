@@ -2,7 +2,7 @@
 #include "cpu.hpp"
 
 namespace Cpu::Operations {
-    Instruction::Instruction(std::shared_ptr<Operation> operation, const uint8_t opcode, std::shared_ptr<uint8_t[]> args, const uint8_t extra_steps)
+    Instruction::Instruction(const std::shared_ptr<Operation> operation, const uint8_t opcode, const std::shared_ptr<uint8_t[]> args, const uint8_t extra_steps)
         : operation(operation), opcode(opcode), args(args), extra_steps(extra_steps) { this->extra_step_i = 0; }
 
     bool Instruction::Step() {

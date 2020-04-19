@@ -16,7 +16,7 @@ namespace Cpu::Operations {
     class Operation {
     public:
         Cpu* const cpu;
-        uint8_t opcode, step_i;
+        uint8_t step_i;
 
         Operation(Cpu* const cpu);
         virtual bool Step() = 0;
@@ -29,13 +29,13 @@ namespace Cpu::Operations {
      */
     class Instruction {
     public:
-        std::shared_ptr<Operation> operation;
+        const std::shared_ptr<Operation> operation;
         const uint8_t opcode;
-        std::shared_ptr<uint8_t[]> args;
+        const std::shared_ptr<uint8_t[]> args;
         const uint8_t extra_steps;
         uint8_t extra_step_i;
 
-        Instruction(std::shared_ptr<Operation> operation, const uint8_t opcode, std::shared_ptr<uint8_t[]> args, const uint8_t extra_steps);
+        Instruction(const std::shared_ptr<Operation> operation, const uint8_t opcode, const std::shared_ptr<uint8_t[]> args, const uint8_t extra_steps);
         bool Step();
         void Execute();
     };
